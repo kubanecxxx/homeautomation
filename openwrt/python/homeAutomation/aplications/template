@@ -1,0 +1,21 @@
+
+from hardware import serialHardware
+from aplications.baseClass import baseClass
+from dispatcher.commandTable import commands
+
+class app(baseClass):
+    def __init__(self):
+        self._name= None
+        pass
+   
+    def new_data(self,commands,hw,pipe,command_code,data):
+        pass 
+    
+    def error(self,hw,error_code):
+        pass
+    
+    def tx_finished(self,pipe):
+        pass
+    
+    def tx_failed(self,args):
+        pass
