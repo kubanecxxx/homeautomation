@@ -122,7 +122,7 @@ include $(LIBRARIES)/rules.mk
 include $(LIBRARIES)/../config/rules.mk
 
 CSRC +=  $(CFILES)
-CPPSRC += $(CPPFILES) temperature/Temperature.cpp 
+CPPSRC += $(CPPFILES) 
 CPPSRC += relays/Outputs.cpp application.cpp
 
 #

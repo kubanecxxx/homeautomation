@@ -31,8 +31,8 @@ static const NRF24Config c =
 
 //no fear konstruktor se zavolá
 RF24 rf(&SPID1, &c);
-RF24_app ap(&rf, config_table.address + config_table.pipe_kotel,
-		config_table.channel);
+RF24_app ap(&rf, config_table_kotel.address + config_table_kotel.pipe,
+		config_table_kotel.channel);
 
 packetHandling ph(&ap, phTable);
 
@@ -43,6 +43,14 @@ void clear_watchdog(void)
 {
 	IWDG->KR = 0xAAAA;
 }
+
+void state(bool ok)
+{
+	palWritePad(TEST_LED_PORT3,TEST_LED_PIN3,ok);
+}
+
+static const packetHandling::function_table_t ph_ft =
+{ clear_watchdog, NVIC_SystemReset, state};
 
 /*
  * Application entry point.
@@ -56,18 +64,19 @@ int main(void)
 
 	mcu_conf();
 
-	for (int i = 0 ; i < 10; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		chThdSleepMilliseconds(100);
-		palTogglePad(TEST_LED_PORT3,TEST_LED_PIN3);
+		palTogglePad(TEST_LED_PORT3, TEST_LED_PIN3);
 	}
 
 	ap.start();
 	appInit();
 
 	ph.StartAutoIdle();
-	ph.setWatchdogResetFunction(clear_watchdog);
+	ph.setFunctionTable(&ph_ft);
 	enable_watchdog();
+	ph.RequestData(STARTUP);
 
 	while (TRUE)
 	{
@@ -83,8 +92,6 @@ void blik(arg_t)
 {
 
 }
-
-
 
 void enable_watchdog(void)
 {

@@ -3,4 +3,7 @@ build
 .cproject
 .project
 .settings
+*.pyc
+*.s\#?
+*.b\#?
 

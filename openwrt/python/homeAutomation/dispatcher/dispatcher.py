@@ -14,6 +14,9 @@ import os
 import logging
 import array
 import events
+import inspect, os
+path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/.." # script directory
+
 
 class dispatcher:
     def __init__(self):
@@ -62,6 +65,8 @@ class dispatcher:
             arg = self._format_serial_data(args)
             pipe = arg[1]
             self._log.debug("new packet pipe %d; command %d; load " + str(arg[3].tolist()),pipe,arg[2])
+            if (arg[2] == self.command_table().STARTUP):
+                self._log.warning("pipe %d (%s) firmware just started-up" % (pipe,self.command_table().stations[pipe]))
             pass
         elif code == self._hw.TX_FINISHED:
             #pipe number
@@ -123,7 +128,7 @@ class dispatcher:
             
     def _get_objects(self, objects):
         # @type objects: {}
-        filename = os.path.abspath("aplications")
+        filename = os.path.abspath(path + "/aplications")
         a = os.listdir(filename)
         a.remove("baseClass.py")
         a.remove("__init__.py")
@@ -163,18 +168,34 @@ class dispatcher:
             
         return objects  
                 
-    def send_packet(self, pipe, command, data = None):
+    def send_packet(self, pipe, command, data = None, integerLength = None):
         # @type pipe: int 
         # @type command: int
         # @type data: array.array("B") 
         payload = array.array("c")
         
         if data is not None:
-            payload.fromstring(data.tostring())
+            if type(data) is array.array("B"):
+                payload.fromstring(data.tostring())
+            if type(data) is int:
+                t = data                
+                if type(integerLength) is int:
+                    while integerLength > 0:
+                        payload.append(chr(t & 0xff))
+                        t >>= 8
+                        integerLength -= 1
+                        
+                else:    
+                    while t:
+                        payload.append(chr(t & 0xff))
+                        t >>= 8
             
+        command |= self._command_table.WRITE_FLAG    
         payload.insert(0,chr((command >> 8) & 0xff))
         payload.insert(0,chr(command & 0xff))
         
+        self._log.info("send ack payload pipe %d, command %d, load %s",pipe,command,str(data))
+        self._log.info("send ack payload raw: %s" ,str(payload))
         self._hw.put_ack_payload(pipe, payload)
          
         pass

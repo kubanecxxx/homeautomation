@@ -1,0 +1,31 @@
+@CHARSET "UTF-8";
+
+body {
+	background-color: black;
+	color: white;
+}
+
+/*
+#divCenter {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -140px;
+	margin-left: -125px;
+	width: 250px;
+	height: 280px;
+	border: 1px dashed;
+	padding: 10px
+}
+*/
+svg#nevim {
+	display: inline;
+}
+
+input#zadanaTeplota {
+	width: 105px;
+}
+
+select#programy {
+	width: 100%;
+}

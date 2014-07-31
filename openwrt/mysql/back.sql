@@ -63,7 +63,7 @@ CREATE TABLE `programy` (
 
 LOCK TABLES `programy` WRITE;
 /*!40000 ALTER TABLE `programy` DISABLE KEYS */;
-INSERT INTO `programy` VALUES (1,25,'00:00:00','00:00:00',NULL,NULL),(2,100,'16:00:00','18:00:00',NULL,1),(2,100,'17:30:00','01:00:00',NULL,0),(3,25,'06:00:00','08:00:00',0,0),(3,25,'06:00:00','08:00:00',1,0),(3,26,'08:00:00','12:00:00',0,1),(3,26,'08:00:00','12:00:00',1,1),(3,27,'12:00:00','18:00:00',0,2),(3,29,'18:00:00','06:00:00',0,3),(4,100,'00:00:00','00:00:00',NULL,NULL);
+INSERT INTO `programy` VALUES (0,-100,'00:00:00','00:00:00',NULL,NULL),(1,25,'00:00:00','00:00:00',NULL,NULL),(2,100,'16:00:00','18:00:00',NULL,1),(2,100,'17:30:00','01:00:00',NULL,0),(3,25,'06:00:00','08:00:00',0,0),(3,25,'06:00:00','08:00:00',1,0),(3,26,'08:00:00','12:00:00',0,1),(3,26,'08:00:00','12:00:00',1,1),(3,27,'12:00:00','18:00:00',0,2),(3,29,'18:00:00','06:00:00',0,3),(4,100,'00:00:00','00:00:00',NULL,NULL);
 /*!40000 ALTER TABLE `programy` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -240,6 +240,27 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_getProgramyNames` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50020 DEFINER=`kubanec`@`192.168.1.148`*/ /*!50003 PROCEDURE `sp_getProgramyNames`()
+begin
+select programy.id,name,teplota from programy inner join programy_names on programy.id = programy_names.id  where if (start < stop , curtime() > start and curtime() < stop  ,
+        curtime() > start and time_to_sec(curtime()) < time_to_sec(stop) + 86400)
+         and (weekend is NULL or sp_isweekend() = weekend)  group by name order by programy.id  ;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_isweekend` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -298,4 +319,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-04-22 21:42:27
+-- Dump completed on 2014-04-23 17:54:02

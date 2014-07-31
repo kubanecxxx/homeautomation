@@ -9,6 +9,7 @@ import Queue
 import pickle
 import time
 import logging
+from threading import Timer
 
 PREAMBLE = 0x44
 
@@ -54,6 +55,8 @@ class Hardware:
         self._buffer = []
         self._log = logging.getLogger("root.serialHardware")
         self._tx_finished_lock = Lock()
+        self._loop_idx = 0
+        self._loop_reciver_timeout_lock = Lock()
         
 
     def open(self, path_serial):
@@ -142,11 +145,18 @@ class Hardware:
         except:
             events.event.register_exit()
 
+    def _receiver_timeout(self):
+        self._loop_reciver_timeout_lock.acquire()
+        self._loop_idx = 0
+        self._loop_reciver_timeout_lock.release()
+        self._log.warn("receiving timeout - byte index reset to 0")
+        pass
+
     def __loop(self):
         command = 0 
         size = 0
         payload = array.array("c")
-        idx = 0
+        self._loop_idx = 0
         crc = 0
 
         while True:
@@ -157,25 +167,28 @@ class Hardware:
                 events.event.register_exit()
                 
             char = int(char.encode("hex"), 16)
+            self._loop_reciver_timeout_lock.acquire()
 
-            if idx == 0:
+            if self._loop_idx == 0:
+                tmr = Timer(0.5,self._receiver_timeout)
+                tmr.start()    
                 if char != PREAMBLE:
-                    idx = 0
+                    self._loop_idx = 0
                     crc = 0
                     del(payload[:])
 
-            elif idx == 1:
+            elif self._loop_idx == 1:
                 command = char
 
-            elif idx == 2:
+            elif self._loop_idx == 2:
                 size = char
 
-            elif idx >= 3:
+            elif self._loop_idx >= 3:
                 payload.append(chr(char))
 
-            if idx != 0:
+            if self._loop_idx != 0:
                 crc = self._crc.crcByte(crc, char)
-            if idx - 3 == size:
+            if self._loop_idx - 3 == size:
                 # i = 1
                 payload.pop()
                 # do stuff with packet
@@ -186,10 +199,12 @@ class Hardware:
                 
                 # reinit state machine
                 crc = 0
-                idx = -1
+                tmr.cancel()
+                self._loop_idx = -1
                 del(payload[:])
 
-            idx += 1
+            self._loop_idx += 1
+            self._loop_reciver_timeout_lock.release()
         pass
     
     def _do_packet(self, command, payload):

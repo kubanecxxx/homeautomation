@@ -11,6 +11,7 @@
 #include "Temperature.h"
 #include "scheduler.hpp"
 #include "Outputs.h"
+#include "platform.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -33,7 +34,7 @@ static Temperature t;
 static Scheduler temp(refresh_temp, NULL, MS2ST(2000));
 static void InitTemperature()
 {
-	t.Init();
+	t.Init(&I2CD1,I2C_TEMP_ADDRESS);
 	temp.Register();
 }
 

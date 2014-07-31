@@ -13,7 +13,7 @@ import array
 
 class app(baseClass):
     def __init__(self,name):
-        baseClass.__init__(self,name)
+        baseClass.__init__(self,name,False)
         
         self.vmt[Hardware.NEW_DATA] = self.new_data
         self._pipe_list = [2]

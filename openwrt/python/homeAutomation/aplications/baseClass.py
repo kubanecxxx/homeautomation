@@ -6,9 +6,57 @@ Created on 30. 3. 2014
 
 from hardware.serialHardware import Hardware
 import logging
+import threading
+import array
+import library.TimerReset
+import MySQLdb as mdb
+import fcntl
+import datetime
+
+def print_pts(text):
+    try:
+        fp = open("/dev/pts/1", 'w')
+        fp.write(str(text) + "\r\n")
+        fp.close()
+    except:
+        return
+    
+def log_to_db(base,pipe,value,table,parameter,db_table, tolerance = False):
+    #writes data to database if value is different from last sample 
+    
+    idd = table.stations_db_ids[pipe]
+    con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek") 
+    cur = con.cursor()
+    query = "select cas,%s from %s where cas=(select max(cas) from %s where sensor=%d)" \
+    % (parameter,db_table,db_table,idd)
+    cur.execute(query)
+
+    q = "insert into %s(%s,sensor) values(%s,%d)" % (db_table,parameter,value,idd)
+    query = None
+    a = cur.fetchone()
+    now = datetime.datetime.now()
+    if a:
+        cas = a[0]
+        _zije = a[1]
+        if _zije != value:
+            if tolerance:
+                if not( (_zije + 0.5) >= value and  value >= (_zije - 0.5)) \
+                 or (cas + datetime.timedelta(minutes=2)) < now:
+                    query = q
+            else:
+                query = q
+    else:
+        query = q
+             
+    if query:
+        cur.execute(query)
+    con.close()
+    
+    return query
+
 
 class baseClass:
-    def __init__(self, name):
+    def __init__(self, name, autoResponseCheck = True):
         # args in tuple
         self._vmt = {
                      Hardware.NEW_DATA : None,  # (dispatcher_instance, pipe, application_command, data)
@@ -20,7 +68,51 @@ class baseClass:
         self._pipe_list = []
         self._log = logging.getLogger("root.apps." + name)
         self._log.info("Instance created: %s", name)
-
+        
+        #self._timer = library.TimerReset.TimerReset(5,self._check_resp_timeout)
+        #self._timer.setName(("check_response_timeout %s" % name))
+        self._lock = threading.Lock()
+        self._responding = False
+        self._timer = None
+        
+        self._autoResponseCheck = autoResponseCheck
+        #if autoResponseCheck:
+        #    self._timer.start()        
+    
+        self._command_table = {};
+    
+    def _check_response(self,pipe,table):    
+        #self._timer.reset(5)
+        if self._timer:
+            self._timer.cancel()
+        self._timer = threading.Timer(5,self._check_resp_timeout,[pipe,table])
+        self._timer.setName(("check_response_timeout %s") %self._name)
+        self._timer.start()
+        self._lock.acquire()
+        ar = self._responding
+        self._responding = True
+        self._lock.release()
+        
+        log_to_db(self, pipe, True, table,"zije","alive")
+        if not ar:
+            self._log.warning("Slave is alive now")
+            
+        
+    def _check_resp_timeout(self,pipe,table):
+        self._lock.acquire()
+        self._responding = False
+        self._lock.release()
+        self._log.warning("Slave doesn't respond for 5 seconds")
+        log_to_db(self, pipe, False, table,"zije","alive")
+        pass
+    
+    @property
+    def responding(self):
+        self._lock.acquire()
+        a = self._responding
+        self._lock.release()
+        return a
+    
     @property
     def vmt(self):
         return self._vmt
@@ -29,4 +121,42 @@ class baseClass:
     def pipe_list(self):
         return self._pipe_list
     
+    @staticmethod
+    def getInt(arr):
+        if type(arr) is not array.array:
+            raise ValueError
         
+        t = 0
+        arr.reverse()
+        for j in arr:
+            t <<= 8
+            t |= j & 0xff
+            
+        return t
+            
+    def _command_handler(self, args):
+        # @type dispatcher: dispatcher
+        # @type pipe: int
+        # @type command: int
+        # @type payload: array.array("B")
+        
+        dispatcher,pipe,command,payload = args
+        table = dispatcher.command_table()
+        send_function = dispatcher.send_packet
+        t = command | table.WRITE_FLAG
+        
+        if self._autoResponseCheck:
+            self._check_response(pipe,table)
+        
+        self._log.debug("new command  %d, load %s" % (command,payload))
+        if self._command_table.has_key(t):
+            f = self._command_table[t]
+            f(send_function,table,pipe,command,payload)
+            return
+            
+        t = command & (~table.WRITE_FLAG & 0xffff)
+        if self._command_table.has_key(t):
+            f = self._command_table[t]
+            f(send_function,table,pipe,command,payload)
+
+

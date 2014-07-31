@@ -5,13 +5,25 @@ Created on 30. 3. 2014
 '''
 
 from hardware.serialHardware import Hardware
-from aplications.baseClass import baseClass
+from aplications.baseClass import baseClass, log_to_db,print_pts
 from dispatcher.commandTable import commands
 from dispatcher.dispatcher import dispatcher
 import logging
 import array
 import time
+import MySQLdb as mdb
+from dispatcher import commandTable
 
+
+def log_temperature(base,pipe,load,table):
+    if (len(load) != 2):
+        return
+
+    teplota = base.getInt(load) / 2.0
+    print_pts(log_to_db(base,pipe,teplota,table,"value","temperatures",True))
+    print_pts(teplota)
+        
+    
 class app(baseClass):
     def __init__(self,name):
         baseClass.__init__(self,name)
@@ -20,32 +32,58 @@ class app(baseClass):
         self.vmt[Hardware.NEW_DATA] = self.new_data
         self.vmt[Hardware.TX_FINISHED] = self.cosi
         #self.vmt[Hardware.TX_FAILED] = self.err
-        self._pipe_list = [0, 1]
+        self._pipe_list = [1]
 
         self.i = 0
-        #logging.getLogger("root.dispatcher").setLevel(logging.WARN)
+        self._idle_count = 0
+        #logging.getLogger("root.dispatcher").setLevel(logging.ERROR)        
+                
+        #logging.getLogger("root.serialHardware").setLevel(logging.ERROR)
+        
+        
+    def _idle_data(self,send,table,pipe,command,load):
+        #send(pipe, table.KOTEL_TOPIT,0,1)
+        #tady rozhodovat treba kazdej desatej poslat jesli topit nebo ne
+        
+        self._log.debug("idle from pipe %d" % pipe)
+        #send(table.PIPE_KOTEL,table.MCU_RESET)
+        #print_pts("idle from pipe %d" % pipe)
+        
+        if (self._idle_count > 5):
+            con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek")
+            cur = con.cursor()
+            cur.execute("select sp_topit()");
+            topit = cur.fetchone()
+            con.close()
+            topit = topit[0]
+            #self._log.warn("topit %d" % topit)
+            self._log.debug("topit %d" % topit)
+            send(table.PIPE_KOTEL,table.KOTEL_TOPIT,topit,1)
+            self._idle_count = 0
+        
+        self._idle_count += 1
+            
+        return
+    
+    def _new_temperature(self,send,table,pipe,command,load):
+        (log_temperature(self,pipe, load, table))
+        pass
+   
+    def _new_cerpadlo(self,send,table,pipe,command,load):
+        
+        #send(table.PIPE_KOTEL,table.MCU_RESET)
+        pass
    
     def new_data(self,args):
-        #@type dispatcher: dispatcher
-        #@type pipe: int
-        #@type command: int
-        #@type payload: array.array("B")
-        dispatcher,pipe,command,payload = args
-
-        #print pipe
-        #print command
-        #print payload.tolist()
-        c = 7
-
-        print payload;          
-        if (self.i % 4) == 0:            
-            dispatcher.send_packet(0, c )
-            #dispatcher.send_packet(1, c )
-            
-        self.i += 1
+        dispatcher = args[0]
+        table = dispatcher.command_table()
+        self._command_table[table.IDLE] = self._idle_data
+        self._command_table[table.KOTEL_CERPADLO] = self._new_cerpadlo
+        self._command_table[table.KOTEL_TEMPERATURE] = self._new_temperature
+#        logging.getLogger("root").setLevel(logging.INFO)
+        self._command_handler(args)
         
-        pass 
-    
+             
     def cosi(self,args):
         
         pass

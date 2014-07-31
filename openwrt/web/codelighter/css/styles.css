@@ -1,0 +1,66 @@
+@CHARSET "UTF-8";
+
+body {
+	background-color: #000000;
+	margin:0px;
+	padding:0px;
+}
+
+#divCenter {
+	position: absolute;
+	/*top: 50%;*/
+	left: 50%;
+	/*margin-top: -110px;*/
+	margin-left: -125px;
+	width: 250px;
+	height: 280px;
+	/*border: 1px dashed;*/
+	padding: 10px
+}
+
+li#header_item
+{
+	display:inline;
+	padding-left:20px;
+}
+
+ul#header_items
+{
+	position:absolute;
+	right:50px;
+	
+	margin:0px
+}
+
+div#header {
+	/*border-bottom : 1px solid;*/	
+	width :100%;
+	height : 20px;
+	/*background-color: #dddddd;*/
+	color:grey;
+	
+}
+
+div#footer {
+	position:absolute;
+	bottom :0px;
+	height: 30px;
+	width:100%;
+}
+
+#a_header 
+{
+	color: #80ff80;
+}
+
+svg#nevim {
+	display: inline;
+}
+
+input#zadanaTeplota {
+	width: 105px;
+}
+
+select#programy {
+	width: 100%;
+}

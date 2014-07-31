@@ -54,6 +54,8 @@ extern "C" {
 #define I2C_SCL_PIN 8
 #define I2C_SDA_PIN2 10
 #define I2C_SCL_PIN2 11
+//address of temperature sensor
+#define I2C_TEMP_ADDRESS 0b1001111
 
 //gpio pins relays
 
