@@ -31,7 +31,17 @@ typedef enum nrf_commands_t
 	KOTEL_TOPIT = 100,			//payload 1byte 1-topit 0-netopit
 	KOTEL_TEMPERATURE = 101,	//payload 2byte temperature * 10
 	KOTEL_CERPADLO = 102,		//payload 1byte 1-cerpadlo jede 0-cerpadlo nejede
-	KOTEL_CERPADLO_TIMEOUT = 103 //payload 2byte - timeout v sekundach
+	KOTEL_CERPADLO_TIMEOUT = 103, //payload 2byte - timeout v sekundach
+
+
+//handle
+	HANDLE_MAIN_SCREEN = 200,
+	HANDLE_WATER_SCREEN = 201,
+	HANDLE_HEATING_SCREEN = 202,
+
+
+	DATA_ERROR = 500,
+	DATA_COUNT_ERROR = 501
 } nrf_commands_t;
 
 typedef struct config_table_t

@@ -157,8 +157,8 @@ void cb_enterVoda(piris::PKeyEvent *, piris::PSpecialSpinBox *)
 	voda_screen.makeActive();
 }
 
-int16_t temp = 200;
-int16_t temp2 = 400;
+int16_t ManualTemp = 200;
+int16_t HeatingTemp = 400;
 
 void cb_programSwitcher(piris::PKeyEvent * evt, piris::PSpecialSpinBox * spin)
 {
@@ -182,14 +182,14 @@ void cb_programSwitcher(piris::PKeyEvent * evt, piris::PSpecialSpinBox * spin)
 	{
 		main_teplotaChtena.setHidden(false);
 		main_teplotaChtena.setEnabled(true);
-		main_teplotaChtena.setValue(temp);
+		main_teplotaChtena.setValue(ManualTemp);
 	}
 	//topeni
 	else if (s == 3)
 	{
 		main_teplotaChtena.setHidden(false);
 		main_teplotaChtena.setEnabled(false);
-		main_teplotaChtena.setValue(temp2);
+		main_teplotaChtena.setValue(HeatingTemp);
 	}
 	else
 	{
@@ -205,7 +205,7 @@ void cb_temperature(piris::PKeyEvent * evt, piris::PSpecialSpinBox * spin)
 	if (evt->key != kENTER)
 		return;
 
-	temp = spin->val();
+	ManualTemp = spin->val();
 }
 
 }

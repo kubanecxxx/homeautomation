@@ -129,6 +129,7 @@ include $(PIRIS)/rules.mk
 CSRC +=  $(CFILES) porting/st7735_port.c
 CPPSRC += $(CPPFILES) 
 CPPSRC +=  application.cpp gui/guiinit.cpp gui/PwmBacklight.cpp porting/PirisPort.cpp
+CPPSRC += dataModel.cpp
 
 #
 # Project, sources and paths

@@ -106,6 +106,7 @@ class dispatcher:
                     cb(arg)
             except:
                 self._log.exception("Application module \"%s\" raised exception in \"%s\" handler", f._name, exp)
+                f._log.exception("Raised exception")
         self._lock.release()
         
     

@@ -20,8 +20,8 @@ def log_temperature(base,pipe,load,table):
         return
 
     teplota = base.getInt(load) / 2.0
-    print_pts(log_to_db(base,pipe,teplota,table,"value","temperatures",True))
-    print_pts(teplota)
+    base._log.debug(log_to_db(base,pipe,teplota,table,"value","temperatures",True))
+    base._log.debug(teplota)
         
     
 class app(baseClass):

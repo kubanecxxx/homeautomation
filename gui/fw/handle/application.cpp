@@ -13,6 +13,7 @@
 #include "ch.h"
 #include "hal.h"
 #include "guiinit.h"
+#include "dataModel.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -25,19 +26,21 @@ static void InitRelays();
 static void refresh_temp(arg_t);
 /* Private functions ---------------------------------------------------------*/
 
+dataModel model;
+
 void appInit()
 {
-	InitTemperature();
+	//InitTemperature();
+	model.Init();
 }
 
 static Temperature t;
 static Scheduler temp(refresh_temp, NULL, MS2ST(2000));
 static void InitTemperature()
 {
-	t.Init(&I2CD2,I2C_TEMP_ADDRESS);
+	t.Init(&I2CD2, I2C_TEMP_ADDRESS);
 	temp.Register();
 }
-
 
 //temperature measure timeout
 void refresh_temp(arg_t)
@@ -57,20 +60,10 @@ void refresh_temp(arg_t)
 	}
 }
 
-/* Callbacks ---------------------------------------------------------*/
-
-void topit_cb(packetHandling * ph, nrf_commands_t cmd, void * data,
-		uint8_t size, void *userData)
-{
-	if (size != 1)
-		return;
-
-	uint8_t topit = *((uint8_t *) data);
-
-}
-
 /* Callbacks table-----------------------------------------------------------*/
 const packetHandling::callback_table_t phTable[] =
 {
-{ KOTEL_TOPIT, topit_cb, NULL },
+{ HANDLE_MAIN_SCREEN, dataModel::mainScreenCb, &model },
+{ HANDLE_HEATING_SCREEN, dataModel::heatingScreenCb, &model },
+{ HANDLE_WATER_SCREEN, dataModel::waterScreenCb, &model },
 { IDLE, NULL, NULL }, };

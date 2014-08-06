@@ -32,6 +32,11 @@ extern piris::PSpecialSpinBox main_teplotaVoda;
 extern piris::PSpecialSpinBox main_teplotaDoma;
 extern piris::PSpecialSpinBox main_program;
 extern piris::PWidget main_square;
+extern piris::PSpecialSpinBox main_topi;
+extern int16_t ManualTemp;
+extern int16_t HeatingTemp;
+
+
 
 typedef struct
 {

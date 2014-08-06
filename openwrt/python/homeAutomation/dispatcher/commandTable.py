@@ -39,12 +39,20 @@ class commands:
     KOTEL_CERPADLO = 102
     KOTEL_CERPADLO_TIMEOUT = 103
 
+    #handle
+    HANDLE_MAIN_SCREEN = 200
+    HANDLE_WATER_SCREEN = 201
+    HANDLE_HEATING_SCREEN = 202
+
+
+
     PIPE_KOTEL = 1
     PIPE_OVLADAC = 0
     
     stations_db_ids = {}
     stations_db_ids[PIPE_KOTEL] = 201
     stations_db_ids[PIPE_OVLADAC] = 200
+    
     
     stations = {}
     stations[PIPE_KOTEL] = "kotel"

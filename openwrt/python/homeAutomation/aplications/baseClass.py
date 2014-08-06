@@ -80,12 +80,14 @@ class baseClass:
         #    self._timer.start()        
     
         self._command_table = {};
+        self._log.handlers = []
+        self._log.setLevel(logging.NOTSET)
     
     def _check_response(self,pipe,table):    
         #self._timer.reset(5)
         if self._timer:
             self._timer.cancel()
-        self._timer = threading.Timer(5,self._check_resp_timeout,[pipe,table])
+        self._timer = threading.Timer(10,self._check_resp_timeout,[pipe,table])
         self._timer.setName(("check_response_timeout %s") %self._name)
         self._timer.start()
         self._lock.acquire()
@@ -102,7 +104,7 @@ class baseClass:
         self._lock.acquire()
         self._responding = False
         self._lock.release()
-        self._log.warning("Slave doesn't respond for 5 seconds")
+        self._log.warning("Slave has not responded for 10 seconds")
         log_to_db(self, pipe, False, table,"zije","alive")
         pass
     

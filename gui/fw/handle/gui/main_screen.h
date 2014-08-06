@@ -53,7 +53,7 @@ DECL_SPECIAL_SPINBOX(main_teplotaVoda,&main_screen);
 const DECL_LABEL_PROPERTIES(main_teplotaDoma_label,MARGIN,85,"Doma",piris::INVALID,piris::INVALID,&font8,font8_p);
 piris::PLabel main_teplotaDoma_label(main_teplotaDoma_label_p);
 const DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_teplotaDoma,MARGIN+35,80,"",piris::INVALID,piris::INVALID,&font16,font16_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaDoma, 0,500,5, NULL, NULL,0, NULL,2,"%3d~",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaDoma, -500,500,5, NULL, NULL,0, NULL,2,"%3d~",NULL);
 DECL_SPECIAL_SPINBOX(main_teplotaDoma,&main_screen);
 
 void cb(piris::PKeyEvent *evt, piris::PSpecialSpinBox *spin);
@@ -68,7 +68,7 @@ piris::PSpecialSpinBox main_menu(main_menu_sp,main_menu_p,&main_screen);
 //topim/netopim
 const char * topi_table[2] =
 {
-    "Topim  ","Netopim"
+    "Netopim  ","Topim  "
 };
 const DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_topi,60,140,"",piris::GREEN,piris::INVALID,NULL,font8_p);
 const DECL_SPECIALSPINBOX_PROPERTIES(main_topi, 0,1,1, NULL, topi_table,2, NULL,0,"",NULL);

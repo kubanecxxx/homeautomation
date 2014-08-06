@@ -44,6 +44,8 @@ void clear_watchdog(void)
 	IWDG->KR = 0xAAAA;
 }
 
+int16_t connection_status;
+
 void connection_state(bool ok)
 {
 	piris::PColor col;
@@ -92,6 +94,8 @@ int main(void)
 	//enable_watchdog();
 	ph.RequestData(STARTUP);
 
+	gui::main_teplotaDoma = -100;
+
 	while (TRUE)
 	{
 		Scheduler::Play();
@@ -103,16 +107,26 @@ int main(void)
 	return 1;
 }
 
+#include "dataModel.h"
+extern dataModel model;
+
 void blik(arg_t)
 {
 
 	static uint8_t a = 0;
+	static uint8_t b = 0;
 	if (a++ >= 10)
 	{
 		gui::spin_hours.setValue((gui::spin_hours.val() + 1) % 24);
 		gui::spin_hours.dirty = true;
 		a = 0;
 
+	}
+
+	if (b++ >= 30)
+	{
+		model.sendMainScreen();
+		b = 0;
 	}
 	gui::spin_minutes.setValue((gui::spin_minutes.val() + 1) % 60);
 	gui::spin_minutes.dirty = true;
