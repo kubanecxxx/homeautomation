@@ -28,18 +28,70 @@ static void refresh_temp(arg_t);
 
 dataModel model;
 
+//int16_t connection_status;
+void connection_state(bool ok)
+{
+	piris::PColor col;
+	if (ok)
+	{
+		col = piris::BLUE;
+		if (model.slaveConnectionStatus())
+		{
+			col = piris::WHITE;
+			if (model.screensReady() == MODEL_READY_MASK)
+				col = piris::GREEN;
+		}
+	}
+	else
+		col = piris::RED;
+
+	gui::main_square.setColor(col);
+	gui::main_square.dirty = true;
+}
+
+void getData_cb(arg_t)
+{
+	static uint8_t ja = 0;
+	if(chTimeNow() < S2ST(30))
+		return;
+
+	if (ja++ > 6)
+	{
+		ja = 0;
+		model.setScreenDirty(MODEL_READY_MASK);
+	}
+
+	uint8_t ready = model.screensReady();
+
+
+	if (ready == MODEL_READY_MASK)
+		return;
+
+	if (!(ready & MODEL_READY_HEATING_WEEKEND))
+		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_HEATING_SCREEN_WEEKEND,1);
+	else if (!(ready & MODEL_READY_HEATING_WEEK) || !(ready & MODEL_READY_HEATING_WEEK_P2))
+		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_HEATING_SCREEN_WEEK,1);
+	else if (!(ready & MODEL_READY_WATER) || !(ready & MODEL_READY_WATER_TEMP))
+		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_WATER_SCREEN,1);
+	else if (!(ready & MODEL_READY_MAIN))
+		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_MAIN_SCREEN,1);
+}
+
 void appInit()
 {
-	//InitTemperature();
+	InitTemperature();
 	model.Init();
 }
 
 static Temperature t;
 static Scheduler temp(refresh_temp, NULL, MS2ST(2000));
+static Scheduler getData(getData_cb,NULL,MS2ST(10000));
+
 static void InitTemperature()
 {
-	t.Init(&I2CD2, I2C_TEMP_ADDRESS);
+	t.Init(&I2CD1, I2C_TEMP_ADDRESS);
 	temp.Register();
+	getData.Register();
 }
 
 //temperature measure timeout
@@ -51,12 +103,13 @@ void refresh_temp(arg_t)
 	t.RefreshTemperature();
 	tem = t.GetTemperature();
 
+	gui::main_teplotaDoma = tem * 5;
 	if (old != tem || count++ > 10)
 	{
 		count = 0;
 		old = tem;
 		//bool ok = ph.WriteData(KOTEL_TEMPERATURE, &tem, 2);
-
+		model.sendHomeTemperature();
 	}
 }
 

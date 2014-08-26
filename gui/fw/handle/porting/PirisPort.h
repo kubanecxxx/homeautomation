@@ -40,6 +40,7 @@ private:
 	uint16_t last_state;
 	Scheduler backlight;
 	static void timeout(arg_t data);
+
 };
 
 #endif /* PIRISPORT_H_ */

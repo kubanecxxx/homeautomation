@@ -44,25 +44,6 @@ void clear_watchdog(void)
 	IWDG->KR = 0xAAAA;
 }
 
-int16_t connection_status;
-
-void connection_state(bool ok)
-{
-	piris::PColor col;
-	if (ok)
-		col = piris::BLUE;
-	else
-		col = piris::RED;
-
-	/*
-	 if (ok && slave_zije)
-	 col = piris::GREEN;
-	 */
-
-	gui::main_square.setColor(col);
-	gui::main_square.dirty = true;
-}
-
 static const packetHandling::function_table_t ph_ft =
 { clear_watchdog, NVIC_SystemReset, connection_state };
 
@@ -71,6 +52,8 @@ static const packetHandling::function_table_t ph_ft =
  */
 systime_t sysTime;
 PirisPort port;
+void blik(arg_t);
+static Scheduler s1(blik, NULL, MS2ST(1000));
 
 int main(void)
 {
@@ -87,20 +70,22 @@ int main(void)
 	gui::guiInit(&port, memory);
 
 	rf24_ap.start();
-	//appInit();
+	appInit();
 
 	ph.StartAutoIdle();
 	ph.setFunctionTable(&ph_ft);
-	//enable_watchdog();
+	enable_watchdog();
 	ph.RequestData(STARTUP);
+	ph.RequestData(HANDLE_GET_SCREENS);
 
 	gui::main_teplotaDoma = -100;
 
+	s1.Register();
 	while (TRUE)
 	{
 		Scheduler::Play();
 		sysTime = chTimeNow();
-		//ph.HandlePacketLoop();
+		ph.HandlePacketLoop();
 		chThdSleepMilliseconds(1);
 	}
 
@@ -113,27 +98,7 @@ extern dataModel model;
 void blik(arg_t)
 {
 
-	static uint8_t a = 0;
-	static uint8_t b = 0;
-	if (a++ >= 10)
-	{
-		gui::spin_hours.setValue((gui::spin_hours.val() + 1) % 24);
-		gui::spin_hours.dirty = true;
-		a = 0;
-
-	}
-
-	if (b++ >= 30)
-	{
-		model.sendMainScreen();
-		b = 0;
-	}
-	gui::spin_minutes.setValue((gui::spin_minutes.val() + 1) % 60);
-	gui::spin_minutes.dirty = true;
-
-	//piris::PColor col = gui::main_square.color();
-	//uint16_t r = col.getR();
-	//col.setR(++r);
+//	ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_WATER_SCREEN,1);
 }
 
 void enable_watchdog(void)
@@ -146,8 +111,6 @@ void enable_watchdog(void)
 	IWDG->KR = 0xCCCC;
 }
 
-static Scheduler s1(blik, NULL, MS2ST(100));
-
 void port_config()
 {
 	//enable pin remapping
@@ -158,6 +121,9 @@ void port_config()
 			PAL_MODE_STM32_ALTERNATE_OPENDRAIN);
 	palSetPadMode(I2C_SCL_PORT, I2C_SCL_PIN,
 			PAL_MODE_STM32_ALTERNATE_OPENDRAIN);
+	palSetPadMode(GPIOB, 10, PAL_MODE_INPUT);
+	palSetPadMode(GPIOB, 11, PAL_MODE_INPUT);
+	AFIO->MAPR |= AFIO_MAPR_I2C1_REMAP;
 
 	//disable jtag - only swd will work - app needs GPIOB3,4
 	AFIO->MAPR |= 0b010 << 24;
@@ -225,5 +191,4 @@ void mcu_conf()
 
 	//palSetPad(TEST_LED_PORT, TEST_LED_PIN);
 
-	s1.Register();
 }

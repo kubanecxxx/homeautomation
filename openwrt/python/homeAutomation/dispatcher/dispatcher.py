@@ -175,10 +175,10 @@ class dispatcher:
         # @type data: array.array("B") 
         payload = array.array("c")
         
-        if data is not None:
-            if type(data) is array.array("B"):
+        if data is not None:    
+            if isinstance(data,array.array):
                 payload.fromstring(data.tostring())
-            if type(data) is int:
+            if isinstance(data, int):
                 t = data                
                 if type(integerLength) is int:
                     while integerLength > 0:

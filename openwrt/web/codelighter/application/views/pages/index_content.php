@@ -155,7 +155,7 @@ function goAway() {
     clearTimeout(timer);
     timer = setTimeout(function() {
     	 location.href = location.href;
-    }, 3000);
+    }, 30000);
 }
 
 window.addEventListener('mousemove', goAway, true);

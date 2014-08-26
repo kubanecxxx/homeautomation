@@ -14,6 +14,9 @@
 
 #include "hal.h"
 #include "PwmBacklight.h"
+#include "dataModel.h"
+
+extern dataModel model;
 
 #define MARGIN  5
 //fonts
@@ -119,6 +122,11 @@ piris::PMaster * guiInit(piris::PPortingAbstract * port, size_t & size)
 	topeni_screen_weekend.setFocusWidget(&topeni_weekend_day);
 	voda_screen.setFocusWidget(&voda_startH1);
 
+	voda_screen.addChild(&main_square);
+	menu_screen.addChild(&main_square);
+	topeni_screen_week.addChild(&main_square);
+	topeni_screen_weekend.addChild(&main_square);
+
 	mast.setHW(port);
 
 	size = main_screen.dataSize();
@@ -127,6 +135,9 @@ piris::PMaster * guiInit(piris::PPortingAbstract * port, size_t & size)
 	size += topeni_screen_weekend.dataSize();
 	size += voda_screen.dataSize();
 
+	main_teplotaChtena.setHidden(true);
+	voda_screen.makeActive();
+
 	chThdCreateStatic(&gui_thd, 1024, LOWPRIO, thd_gui, &mast);
 
 	return &mast;
@@ -134,6 +145,24 @@ piris::PMaster * guiInit(piris::PPortingAbstract * port, size_t & size)
 
 void cb(piris::PKeyEvent *, piris::PSpecialSpinBox *)
 {
+	menu_screen.makeActive();
+}
+
+void cb_backFromHeatingWeek(piris::PKeyEvent *, piris::PSpecialSpinBox *)
+{
+	model.sendHeatingScreen(false);
+	menu_screen.makeActive();
+}
+
+void cb_backFromHeatingWeekend(piris::PKeyEvent *, piris::PSpecialSpinBox *)
+{
+	model.sendHeatingScreen(true);
+	menu_screen.makeActive();
+}
+
+void cb_backFromWater(piris::PKeyEvent *, piris::PSpecialSpinBox *)
+{
+	model.sendWaterScreen();
 	menu_screen.makeActive();
 }
 

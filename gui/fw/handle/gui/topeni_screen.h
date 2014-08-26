@@ -6,12 +6,14 @@ piris::PScreen topeni_screen_week(main_screen_p,&mast);
 
 
 //week/weekend
+void cb_backFromHeatingWeekend(piris::PKeyEvent *, piris::PSpecialSpinBox *);
+void cb_backFromHeatingWeek(piris::PKeyEvent *, piris::PSpecialSpinBox *);
 void cb_enterTopeniWeekend (piris::PKeyEvent *, piris::PSpecialSpinBox *);
 const DECL_COMMON_SPECIALSPINBOXWIDGET_PROPERTIES(topeni_week_day,MARGIN,10,"Po-Pa",font8_p);
 const DECL_SPECIALSPINBOX_PROPERTIES(topeni_week_day, 0,6,1, cb_enterTopeniWeekend, NULL,0, NULL,0,"",NULL);
 DECL_SPECIAL_SPINBOX(topeni_week_day,&topeni_screen_week);
 
-const DECL_SPECIALSPINBOX_PROPERTIES(topeni, 0,500,5, NULL, NULL,0, NULL,3,"%3d~C",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(topeni, 0,900,5, NULL, NULL,0, NULL,3,"%3d~C",NULL);
 
 #define DECL_TOPENI_MINUTES(name,sec_x,sec_y) \
 DECL_SPECIAL_SPINBOX_SECOND_COORDINATES(name,sec_x,sec_y); \
@@ -51,7 +53,7 @@ CREATE_ROW(topeni_week,2,4,&topeni_screen_week);
 CREATE_ROW(topeni_week,3,4,&topeni_screen_week);
 
 const DECL_COMMON_SPECIALSPINBOXWIDGET_PROPERTIES(topeni_week_back,50,140,"Zpet",font8_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(topeni_week_back, 0,6,1, cb, NULL,0, NULL,0,"",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(topeni_week_back, 0,6,1, cb_backFromHeatingWeek, NULL,0, NULL,0,"",NULL);
 DECL_SPECIAL_SPINBOX(topeni_week_back,&topeni_screen_week);
 
 //weekend screen
@@ -65,7 +67,7 @@ CREATE_ROW(topeni_weekend,0,2,&topeni_screen_weekend);
 CREATE_ROW(topeni_weekend,1,2,&topeni_screen_weekend);
 
 const DECL_COMMON_SPECIALSPINBOXWIDGET_PROPERTIES(topeni_weekend_back,50,140,"Zpet",font8_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(topeni_weekend_back, 0,6,1, cb, NULL,0, NULL,0,"",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(topeni_weekend_back, 0,6,1, cb_backFromHeatingWeekend, NULL,0, NULL,0,"",NULL);
 DECL_SPECIAL_SPINBOX(topeni_weekend_back,&topeni_screen_weekend);
 
 

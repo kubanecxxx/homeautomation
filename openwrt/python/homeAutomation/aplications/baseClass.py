@@ -83,6 +83,37 @@ class baseClass:
         self._log.handlers = []
         self._log.setLevel(logging.NOTSET)
     
+    def _log_event_to_db(self,pipe,table,event_value,event_id,tolerance = False):
+        #writes data to database if value is different from last sample 
+        idd = table.stations_db_ids[pipe]
+        con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek") 
+        cur = con.cursor()
+        query = "select cas,event from events where event_id = %d order by cas desc limit 1" % event_id         
+        cur.execute(query)
+    
+        q = "insert into events(pipe,event,event_id) values(%d,%s,%d)" % (idd,event_value,event_id)
+        query = None
+        a = cur.fetchone()
+        now = datetime.datetime.now()
+        if a:
+            cas = a[0]
+            _zije = a[1]
+            if _zije != event_value:
+                if tolerance:
+                    if not( (_zije + 0.5) >= event_value and  event_value >= (_zije - 0.5)) \
+                     or (cas + datetime.timedelta(minutes=2)) < now:
+                        query = q
+                else:
+                    query = q
+        else:
+            query = q
+                 
+        if query:
+            cur.execute(query)
+        con.close()
+        
+        return query
+    
     def _check_response(self,pipe,table):    
         #self._timer.reset(5)
         if self._timer:
@@ -95,7 +126,8 @@ class baseClass:
         self._responding = True
         self._lock.release()
         
-        log_to_db(self, pipe, True, table,"zije","alive")
+        self._log_event_to_db(pipe, table, True, 300)
+        #log_to_db(self, pipe, True, table,"zije","alive")
         if not ar:
             self._log.warning("Slave is alive now")
             
@@ -105,7 +137,8 @@ class baseClass:
         self._responding = False
         self._lock.release()
         self._log.warning("Slave has not responded for 10 seconds")
-        log_to_db(self, pipe, False, table,"zije","alive")
+        #log_to_db(self, pipe, False, table,"zije","alive")
+        self._log_event_to_db(pipe, table, False, 300)
         pass
     
     @property

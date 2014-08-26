@@ -47,8 +47,8 @@ extern "C" {
 //i2c temperature pins
 #define I2C_SDA_PORT GPIOB
 #define I2C_SCL_PORT GPIOB
-#define I2C_SDA_PIN 11
-#define I2C_SCL_PIN 10
+#define I2C_SDA_PIN 9
+#define I2C_SCL_PIN 8
 //slave address
 #define I2C_TEMP_ADDRESS 0b1001000
 

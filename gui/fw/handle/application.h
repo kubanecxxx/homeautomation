@@ -21,5 +21,6 @@ extern const packetHandling::callback_table_t phTable[];
 
 /* Exported functions --------------------------------------------------------*/
 void appInit();
+void connection_state(bool ok);
 
 #endif /* APPLICATION_H_ */

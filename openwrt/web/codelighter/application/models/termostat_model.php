@@ -32,6 +32,7 @@ class termostat_model extends CI_Model
     function getTemperatures()
     {
         $q = $this->db->query("select temperatures.sensor,value  value from temperatures inner join (select temperatures.sensor, max(cas) as ts from temperatures group by temperatures.sensor) maxt on (maxt.sensor=temperatures.sensor and maxt.ts = temperatures.cas  ) order by sensor ");      
+        #$q = $this->db->query("call sp_lastTemperatures()");
         return $q;
     }
     

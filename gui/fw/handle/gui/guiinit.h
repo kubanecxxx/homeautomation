@@ -35,7 +35,7 @@ extern piris::PWidget main_square;
 extern piris::PSpecialSpinBox main_topi;
 extern int16_t ManualTemp;
 extern int16_t HeatingTemp;
-
+extern piris::PSpecialSpinBox voda_temperature;
 
 
 typedef struct
@@ -89,10 +89,11 @@ extern const heating_row_t heating_weekend[];
  */
 extern const water_row_t water[];
 
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 piris::PMaster * guiInit(piris::PPortingAbstract * port, size_t & size);
-
+extern void cb_programSwitcher(piris::PKeyEvent * evt, piris::PSpecialSpinBox * spin);
 }
 
 #ifdef __cplusplus

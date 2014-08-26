@@ -2,6 +2,7 @@
 #define VODA_SCREEN_H
 
 //screen
+void cb_backFromWater(piris::PKeyEvent *, piris::PSpecialSpinBox *);
 piris::PScreen voda_screen(main_screen_p,&mast);
 
 #define VODA_X_H    (MARGIN)
@@ -34,9 +35,13 @@ piris::PSpecialSpinBox voda_stopH2(hours_sp,voda_stopH2_p,&voda_screen);
 const DECL_COMMON_SPECIALSPINBOXWIDGET_PROPERTIES(voda_stopM2,VODA_X_M,VODA_Y(4),":",font8_p);
 piris::PSpecialSpinBox voda_stopM2(minutes_sp,voda_stopM2_p,&voda_screen);
 
+//maximum water temperature
+const DECL_COMMON_SPECIALSPINBOXWIDGET_PROPERTIES(voda_temperature,VODA_X_H,VODA_Y(6),"Teplota ",font8_p);
+piris::PSpecialSpinBox voda_temperature(topeni_sp,voda_temperature_p,&voda_screen);
+
 //back
 const DECL_COMMON_SPECIALSPINBOXWIDGET_PROPERTIES(voda_back,50,140,"Zpet",font8_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(voda_back, 0,6,1, cb, NULL,0, NULL,0,"",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(voda_back, 0,6,1, cb_backFromWater, NULL,0, NULL,0,"",NULL);
 DECL_SPECIAL_SPINBOX(voda_back,&voda_screen);
 
 #endif // VODA_SCREEN_H

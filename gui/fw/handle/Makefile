@@ -69,7 +69,7 @@ include $(CHIBIOS)/os/kernel/kernel.mk
 
 
 # Define linker script file here
-LDSCRIPT= $(PORTLD)/STM32F100xB.ld
+LDSCRIPT= STM32F100xB.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.

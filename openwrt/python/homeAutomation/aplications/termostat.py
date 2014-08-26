@@ -70,9 +70,14 @@ class app(baseClass):
         pass
    
     def _new_cerpadlo(self,send,table,pipe,command,load):
+        if len(load) != 1:
+            self._log.warning("cerpadlo new data - bad load length")
+            return;
         
+        enabled = load[0]
+        self._log_event_to_db(pipe, table, enabled,302)
         #send(table.PIPE_KOTEL,table.MCU_RESET)
-        pass
+        
    
     def new_data(self,args):
         dispatcher = args[0]

@@ -10,6 +10,10 @@
 #include "pkeyevent.h"
 #include "ptypes.h"
 #include "PwmBacklight.h"
+#include "dataModel.h"
+
+bool processedByUser;
+extern dataModel model;
 
 extern "C" void __cxa_pure_virtual()
 {
@@ -26,14 +30,20 @@ void * operator new(size_t size)
 
 void PirisPort::timeout(arg_t data)
 {
+	static bool uz = false;
 	PirisPort * o = (PirisPort*)data;
+	if (uz)
+		model.sendProgramManual();
+
+	uz = true;
+	processedByUser = false;
 	PwmBacklight::FadeOut();
 }
 
 void PirisPort::start()
 {
 	St7735::Init();
-	backlight.Setup(timeout,this,MS2ST(5000),PERIODIC);
+	backlight.Setup(timeout,this,MS2ST(5000),ONCE);
 	backlight.Register();
 }
 
@@ -57,7 +67,13 @@ bool PirisPort::readKeyEvent(piris::PKeyEvent * evt)
 		last_state = state;
 		PwmBacklight::FadeIn();
 		backlight.Rearm();
+		backlight.Register();
+
+		processedByUser = true;
+
+
 		return true;
+
 	}
 
 	return false;

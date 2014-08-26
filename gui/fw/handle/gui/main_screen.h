@@ -40,20 +40,20 @@ DECL_SPECIAL_SPINBOX(main_program,&main_screen);
 //chtena
 void cb_temperature(piris::PKeyEvent * evt, piris::PSpecialSpinBox * spin);
 DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_teplotaChtena,MARGIN+35,50,"",piris::INVALID,piris::INVALID,&font16,font16_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaChtena, 0,500,5, cb_temperature, NULL,0, NULL,2,"%3d~",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaChtena, 0,990,5, cb_temperature, NULL,0, NULL,2,"%3d~",NULL);
 DECL_SPECIAL_SPINBOX(main_teplotaChtena,&main_screen);
 
 //teplota1
 const DECL_LABEL_PROPERTIES(main_teplotaVoda_label,MARGIN,115,"Voda",piris::INVALID,piris::INVALID,&font8,font8_p);
 piris::PLabel main_teplotaVoda_label(main_teplotaVoda_label_p);
 const DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_teplotaVoda,MARGIN+35,110,"",piris::INVALID,piris::INVALID,&font16,font16_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaVoda, 0,500,5, NULL, NULL,0, NULL,2,"%3d~",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaVoda, 0,990,5, NULL, NULL,0, NULL,2,"%3d~",NULL);
 DECL_SPECIAL_SPINBOX(main_teplotaVoda,&main_screen);
 //teplota2
 const DECL_LABEL_PROPERTIES(main_teplotaDoma_label,MARGIN,85,"Doma",piris::INVALID,piris::INVALID,&font8,font8_p);
 piris::PLabel main_teplotaDoma_label(main_teplotaDoma_label_p);
 const DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_teplotaDoma,MARGIN+35,80,"",piris::INVALID,piris::INVALID,&font16,font16_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaDoma, -500,500,5, NULL, NULL,0, NULL,2,"%3d~",NULL);
+const DECL_SPECIALSPINBOX_PROPERTIES(main_teplotaDoma, -500,990,5, NULL, NULL,0, NULL,2,"%3d~",NULL);
 DECL_SPECIAL_SPINBOX(main_teplotaDoma,&main_screen);
 
 void cb(piris::PKeyEvent *evt, piris::PSpecialSpinBox *spin);
@@ -75,7 +75,7 @@ const DECL_SPECIALSPINBOX_PROPERTIES(main_topi, 0,1,1, NULL, topi_table,2, NULL,
 piris::PSpecialSpinBox main_topi(main_topi_sp,main_topi_p,&main_screen);
 
 //square
-DECL_WIDGET_PROPERTIES(main_square,110,140,15,15,piris::RED);
+DECL_WIDGET_PROPERTIES(main_square,0,0,128,5,piris::RED);
 piris::PWidget main_square(main_square_p);
 
 #endif // MAIN_SCREEN_H
