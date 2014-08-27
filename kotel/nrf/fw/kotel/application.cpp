@@ -28,6 +28,7 @@ void appInit()
 {
 	InitTemperature();
 	InitRelays();
+	palSetPadMode(GPIOA,9,PAL_MODE_INPUT);
 }
 
 static Temperature t;
@@ -63,8 +64,8 @@ void refresh_temp(arg_t)
 		old = tem;
 		bool ok = ph.WriteData(KOTEL_TEMPERATURE, &tem, 2);
 		bool c = outs.getCerpadlo();
-		ok = ph.WriteData(KOTEL_CERPADLO, &c, 1);
-
+		uint8_t ja = c | (palReadPad(GPIOA,9) << 1);
+		ok = ph.WriteData(KOTEL_CERPADLO, &ja, 1);
 	}
 }
 
