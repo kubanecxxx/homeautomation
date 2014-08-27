@@ -74,8 +74,11 @@ class app(baseClass):
             self._log.warning("cerpadlo new data - bad load length")
             return;
         
-        enabled = load[0]
+        enabled = load[0] & 1
+        heating = (load[0] >> 1) & 1
+                
         self._log_event_to_db(pipe, table, enabled,302)
+        self._log_event_to_db(pipe,table, heating,301 )
         #send(table.PIPE_KOTEL,table.MCU_RESET)
         
    

@@ -28,7 +28,7 @@ void appInit()
 {
 	InitTemperature();
 	InitRelays();
-	palSetPadMode(GPIOA,9,PAL_MODE_INPUT);
+	palSetPadMode(GPIOA,9,PAL_MODE_INPUT_PULLDOWN);
 }
 
 static Temperature t;
