@@ -88,7 +88,7 @@ class baseClass:
         idd = table.stations_db_ids[pipe]
         con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek") 
         cur = con.cursor()
-        query = "select cas,event from events where event_id = %d order by cas desc limit 1" % event_id         
+        query = "select cas,event from events where event_id = %d and pipe = %d order by cas desc limit 1" % (event_id, idd)         
         cur.execute(query)
     
         q = "insert into events(pipe,event,event_id) values(%d,%s,%d)" % (idd,event_value,event_id)
@@ -105,6 +105,8 @@ class baseClass:
                         query = q
                 else:
                     query = q
+            if (cas + datetime.timedelta(hours=2)) < now:
+                query = q
         else:
             query = q
                  

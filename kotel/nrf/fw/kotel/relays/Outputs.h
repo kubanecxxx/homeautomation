@@ -32,6 +32,10 @@ public:
 	{
 		return palReadPad(c->cerpadlo_port, c->cerpadlo_pin);
 	}
+	inline bool getTopitLatch() const
+	{
+		return palReadPad(c->kotel_port, c->kotel_pin);
+	}
 	void start();
 
 private:

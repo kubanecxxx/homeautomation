@@ -18,35 +18,32 @@
 /* Private variables ---------------------------------------------------------*/
 extern packetHandling ph;
 /* Private function prototypes -----------------------------------------------*/
-static void InitTemperature();
-static void InitRelays();
 
 static void refresh_temp(arg_t);
 /* Private functions ---------------------------------------------------------*/
 
-void appInit()
-{
-	InitTemperature();
-	InitRelays();
-	palSetPadMode(GPIOA,9,PAL_MODE_INPUT_PULLDOWN);
-}
-
-static Temperature t;
-static Scheduler temp(refresh_temp, NULL, MS2ST(2000));
-static void InitTemperature()
-{
-	t.Init(&I2CD1,I2C_TEMP_ADDRESS);
-	temp.Register();
-}
-
+//relays module config structure
 static const Outputs::config_t o_cfg =
 {
-GPIOA, 10, GPIOA, 11 };
-
+GPIO_HEATING_RELAY_PORT, GPIO_HEATING_RELAY_PIN, GPIO_PUMP_PORT, GPIO_PUMP_PIN };
+//outputs relay instance
 static Outputs outs(&o_cfg);
-static void InitRelays()
+
+//temperature module instance
+static Temperature t;
+static Scheduler temp(refresh_temp, NULL, MS2ST(2000));
+
+void appInit()
 {
+	//init temperature measuring module instance
+	t.Init(&I2CD1, I2C_TEMP_ADDRESS);
+	temp.Register();
+
+	//init output relays module instance
 	outs.start();
+
+	//init input of heating really enabled - gas is burning
+	palSetPadMode(GPIO_FIRE_PORT, GPIO_FIRE_PIN, PAL_MODE_INPUT_PULLDOWN);
 }
 
 //temperature measure timeout
@@ -58,14 +55,30 @@ void refresh_temp(arg_t)
 	t.RefreshTemperature();
 	tem = t.GetTemperature();
 
+	static uint16_t zero = 0;
+	static uint16_t one = 0;
+	uint8_t a = (palReadPad(GPIO_FIRE_PORT, GPIO_FIRE_PIN));
+
+	if (a)
+		one++;
+	else
+		zero++;
+
 	if (old != tem || count++ > 10)
 	{
 		count = 0;
 		old = tem;
-		bool ok = ph.WriteData(KOTEL_TEMPERATURE, &tem, 2);
+		ph.WriteData(KOTEL_TEMPERATURE, &tem, 2);
 		bool c = outs.getCerpadlo();
-		uint8_t ja = c | (palReadPad(GPIOA,9) << 1);
-		ok = ph.WriteData(KOTEL_CERPADLO, &ja, 1);
+
+		uint8_t ja = c;
+		if (one > zero)
+			ja |= 2;
+		ja |= outs.getTopitLatch() << 2;
+		ph.WriteData(KOTEL_CERPADLO, &ja, 1);
+
+		one = 0;
+		zero = 0;
 	}
 }
 
@@ -80,8 +93,8 @@ void cerpadlo_cb(packetHandling *, nrf_commands_t, void * data, uint8_t size,
 	outs.setCerpadloTimeout(to);
 }
 
-void topit_cb(packetHandling * ph, nrf_commands_t cmd, void * data,
-		uint8_t size, void *userData)
+void topit_cb(packetHandling * , nrf_commands_t, void * data, uint8_t size,
+		void *)
 {
 	if (size != 1)
 		return;

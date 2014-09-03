@@ -117,7 +117,7 @@ INCDIR += $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) temperature  relays
          
 
-LIBRARIES = $(HOME)/elektronika/homeAutomation/library
+LIBRARIES = ../../../../library
 include $(LIBRARIES)/rules.mk
 include $(LIBRARIES)/../config/rules.mk
 

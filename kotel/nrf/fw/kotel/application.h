@@ -9,15 +9,11 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
-
-
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 extern const packetHandling::callback_table_t phTable[];
 /* Exported macro ------------------------------------------------------------*/
-
-
 
 /* Exported functions --------------------------------------------------------*/
 void appInit();

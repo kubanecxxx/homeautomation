@@ -76,9 +76,11 @@ class app(baseClass):
         
         enabled = load[0] & 1
         heating = (load[0] >> 1) & 1
+        heating_latch = (load[0] >> 2 &1)
                 
         self._log_event_to_db(pipe, table, enabled,302)
         self._log_event_to_db(pipe,table, heating,301 )
+        self._log_event_to_db(pipe,table, heating_latch,303 )
         #send(table.PIPE_KOTEL,table.MCU_RESET)
         
    

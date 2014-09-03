@@ -58,6 +58,12 @@ extern "C" {
 #define I2C_TEMP_ADDRESS 0b1001111
 
 //gpio pins relays
+#define GPIO_HEATING_RELAY_PORT	GPIOA
+#define GPIO_HEATING_RELAY_PIN 10
+#define GPIO_PUMP_PORT	GPIOA
+#define GPIO_PUMP_PIN	11
+#define GPIO_FIRE_PORT	GPIOA
+#define GPIO_FIRE_PIN	9
 
 
 
