@@ -1,0 +1,2 @@
+mysqldump --host=192.168.1.1 -u kubanec -p --no-data --events --routines pisek > schema.sql
+mysqldump --host=192.168.1.1 -u kubanec --no-create-info -p pisek programy programy_names > data.sql
