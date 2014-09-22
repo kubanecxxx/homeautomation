@@ -50,6 +50,8 @@ void PirisPort::start()
 
 bool PirisPort::readKeyEvent(piris::PKeyEvent * evt)
 {
+	if (model.screensReady() != MODEL_READY_MASK)
+		return false;
 
 	uint16_t state;
 	state = palReadPad(BUTTON_DOWN_PORT, BUTTON_DOWN_PIN) << 1;

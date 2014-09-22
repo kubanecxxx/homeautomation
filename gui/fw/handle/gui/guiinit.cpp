@@ -136,7 +136,7 @@ piris::PMaster * guiInit(piris::PPortingAbstract * port, size_t & size)
 	size += voda_screen.dataSize();
 
 	main_teplotaChtena.setHidden(true);
-	voda_screen.makeActive();
+//	voda_screen.makeActive();
 
 	chThdCreateStatic(&gui_thd, 1024, LOWPRIO, thd_gui, &mast);
 

@@ -38,10 +38,27 @@ class app(baseClass):
         self._idle_count = 0
         #logging.getLogger("root.dispatcher").setLevel(logging.ERROR)        
                 
-        #logging.getLogger("root.serialHardware").setLevel(logging.ERROR)
-        
+        #logging.getLogger("root.serialHardware").setLevel(logging.ERROR)    
         
     def _idle_data(self,send,table,pipe,command,load):
+        
+        FORMAT = '%(asctime)s  [%(name)s]:[%(levelname)s] - %(message)s'
+        formater= logging.Formatter(FORMAT)
+        
+        self._log.handlers = []
+        self._log.setLevel(logging.NOTSET)
+        
+        try:
+            fh = logging.FileHandler("/dev/pts/0",'w')
+            fh.setFormatter(formater)
+            fh.setLevel(logging.DEBUG)
+                        
+            if len(self._log.handlers) == 0:
+                self._log.addHandler(fh)
+                self._log.setLevel(logging.INFO)
+        except:
+            pass
+        
         #send(pipe, table.KOTEL_TOPIT,0,1)
         #tady rozhodovat treba kazdej desatej poslat jesli topit nebo ne
         
@@ -49,7 +66,7 @@ class app(baseClass):
         #send(table.PIPE_KOTEL,table.MCU_RESET)
         #print_pts("idle from pipe %d" % pipe)
         
-        if (self._idle_count > 5):
+        if (self._idle_count > 10):
             con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek")
             cur = con.cursor()
             cur.execute("select sp_topit()");
@@ -57,7 +74,7 @@ class app(baseClass):
             con.close()
             topit = topit[0]
             #self._log.warn("topit %d" % topit)
-            self._log.debug("topit %d" % topit)
+            self._log.info("topit %d" % topit)
             send(table.PIPE_KOTEL,table.KOTEL_TOPIT,topit,1)
             self._idle_count = 0
         
@@ -74,10 +91,14 @@ class app(baseClass):
             self._log.warning("cerpadlo new data - bad load length")
             return;
         
+        
         enabled = load[0] & 1
         heating = (load[0] >> 1) & 1
         heating_latch = (load[0] >> 2) &1
-                
+        
+        i = "new cerpadlo %d, heating %d, latch %d" % (enabled,heating,heating_latch)
+        self._log.info(i)
+            
         self._log_event_to_db(pipe, table, enabled,302)
         self._log_event_to_db(pipe,table, heating,301 )
         self._log_event_to_db(pipe,table, heating_latch,303 )
@@ -95,6 +116,7 @@ class app(baseClass):
         
              
     def cosi(self,args):
+        self._log.info(str(args))
         
         pass
     

@@ -36,7 +36,7 @@ extern piris::PSpecialSpinBox main_topi;
 extern int16_t ManualTemp;
 extern int16_t HeatingTemp;
 extern piris::PSpecialSpinBox voda_temperature;
-
+extern piris::PSpecialSpinBox main_countdown;
 
 typedef struct
 {

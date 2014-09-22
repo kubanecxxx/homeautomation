@@ -32,12 +32,14 @@ void Outputs::topit(bool enable)
 		palSetPad(c->kotel_port, c->kotel_pin);
 		palSetPad(c->cerpadlo_port, c->cerpadlo_pin);
 
+		timeout.Rearm();
 		timeout.Register();
 		cerpadlo.Unregister();
 	}
 	else
 	{
 		timeout.Unregister();
+		cerpadlo.Rearm();
 		cerpadlo.Register();
 
 		palClearPad(c->kotel_port, c->kotel_pin);
@@ -47,7 +49,9 @@ void Outputs::topit(bool enable)
 void Outputs::kotel_timeout(arg_t arg)
 {
 	Outputs * o = (Outputs*) arg;
+	o->cerpadlo.Rearm();
 	o->cerpadlo.Register();
+
 
 	palClearPad(o->c->kotel_port, o->c->kotel_pin);
 }

@@ -38,7 +38,8 @@ void connection_state(bool ok)
 		if (model.slaveConnectionStatus())
 		{
 			col = piris::WHITE;
-			if (model.screensReady() == MODEL_READY_MASK)
+			uint8_t sc = model.screensReady();
+			if (sc == MODEL_READY_MASK)
 				col = piris::GREEN;
 		}
 	}
@@ -52,29 +53,37 @@ void connection_state(bool ok)
 void getData_cb(arg_t)
 {
 	static uint8_t ja = 0;
-	if(chTimeNow() < S2ST(30))
-		return;
-
-	if (ja++ > 6)
+	if (chTimeNow() < S2ST(180))
 	{
+		gui::main_countdown =  chTimeNow() / CH_FREQUENCY;
+		return;
+	}
+
+
+	if (ja++ > 30)
+	{
+
 		ja = 0;
 		model.setScreenDirty(MODEL_READY_MASK);
 	}
 
-	uint8_t ready = model.screensReady();
+	gui::main_countdown = (30 - ja) * 10;
 
+	uint8_t ready = model.screensReady();
 
 	if (ready == MODEL_READY_MASK)
 		return;
 
 	if (!(ready & MODEL_READY_HEATING_WEEKEND))
-		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_HEATING_SCREEN_WEEKEND,1);
-	else if (!(ready & MODEL_READY_HEATING_WEEK) || !(ready & MODEL_READY_HEATING_WEEK_P2))
-		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_HEATING_SCREEN_WEEK,1);
+		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_HEATING_SCREEN_WEEKEND,
+				1);
+	else if (!(ready & MODEL_READY_HEATING_WEEK)
+			|| !(ready & MODEL_READY_HEATING_WEEK_P2))
+		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_HEATING_SCREEN_WEEK, 1);
 	else if (!(ready & MODEL_READY_WATER) || !(ready & MODEL_READY_WATER_TEMP))
-		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_WATER_SCREEN,1);
+		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_WATER_SCREEN, 1);
 	else if (!(ready & MODEL_READY_MAIN))
-		ph.WriteData(HANDLE_GET_SCREENS,HANDLE_RELOAD_MAIN_SCREEN,1);
+		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_MAIN_SCREEN, 1);
 }
 
 void appInit()
@@ -85,7 +94,7 @@ void appInit()
 
 static Temperature t;
 static Scheduler temp(refresh_temp, NULL, MS2ST(2000));
-static Scheduler getData(getData_cb,NULL,MS2ST(10000));
+static Scheduler getData(getData_cb, NULL, S2ST(10));
 
 static void InitTemperature()
 {

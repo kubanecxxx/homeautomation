@@ -30,11 +30,11 @@ public:
 	}
 	inline bool getCerpadlo() const
 	{
-		return palReadPad(c->cerpadlo_port, c->cerpadlo_pin);
+		return ((palReadLatch(c->cerpadlo_port) >> c->cerpadlo_pin) & 1);
 	}
 	inline bool getTopitLatch() const
 	{
-		return palReadPad(c->kotel_port, c->kotel_pin);
+		return ((palReadLatch(c->kotel_port) >> c->kotel_pin) & 1);
 	}
 	void start();
 
