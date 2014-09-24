@@ -16,7 +16,7 @@ Outputs::Outputs(const config_t * config) :
 void Outputs::start()
 {
 	chDbgAssert(c,"config struct is NULL","");
-	timeout.Setup(kotel_timeout, this, S2ST(60), ONCE);
+	timeout.Setup(kotel_timeout, this, S2ST(120), ONCE);
 	cerpadlo.Setup(cerpadlo_timeout, this, S2ST(600), ONCE);
 
 	palSetPadMode(c->cerpadlo_port, c->cerpadlo_pin, PAL_MODE_OUTPUT_PUSHPULL);
