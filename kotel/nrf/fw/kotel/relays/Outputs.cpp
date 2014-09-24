@@ -39,7 +39,6 @@ void Outputs::topit(bool enable)
 	else
 	{
 		timeout.Unregister();
-		cerpadlo.Rearm();
 		cerpadlo.Register();
 
 		palClearPad(c->kotel_port, c->kotel_pin);

@@ -1,4 +1,4 @@
--- MySQL dump 10.15  Distrib 10.0.12-MariaDB, for Linux (x86_64)
+-- MySQL dump 10.15  Distrib 10.0.13-MariaDB, for Linux (x86_64)
 --
 -- Host: 192.168.1.1    Database: pisek
 -- ------------------------------------------------------
@@ -111,7 +111,7 @@ DELIMITER ;;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
-/*!50106 CREATE EVENT `prestan_topit` ON SCHEDULE AT '2014-08-16 19:51:33' ON COMPLETION PRESERVE DISABLE DO update program as p1 join program as p2 on (p1.id_count = 100 and p2.id_count = 101) set p1.id = p2.id, p2.id = p1.id */ ;;
+/*!50106 CREATE EVENT `prestan_topit` ON SCHEDULE AT '2014-09-21 17:44:50' ON COMPLETION PRESERVE DISABLE DO update program as p1 join program as p2 on (p1.id_count = 100 and p2.id_count = 101) set p1.id = p2.id, p2.id = p1.id */ ;;
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;;
@@ -262,8 +262,8 @@ CREATE DEFINER=`kubanec`@`192.168.1.148` PROCEDURE `sp_getProgramyNames`()
 begin
 select programy.id,name,teplota from programy inner join programy_names on programy.id = programy_names.id 
 		where if (start < stop , curtime() > start and curtime() < stop  ,
-        curtime() > start and time_to_sec(curtime()) < time_to_sec(stop) + 86400)
-         and (weekend is NULL or sp_isweekend() = weekend)  or (programy.id = 2 and number = 0) ;
+        (curtime() > start and time_to_sec(curtime()) < time_to_sec(stop) + 86400)
+         and (weekend is NULL or sp_isweekend() = weekend) and programy.id != 2)  or (programy.id = 2 and number = 0) ;
 end ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -365,4 +365,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-09-02 17:17:53
+-- Dump completed on 2014-09-22 19:06:00
