@@ -156,6 +156,7 @@ class app(baseClass):
         
         self._thd_count = 0
         self._id = 0
+        
     
     
     def new_data(self,args):
@@ -377,6 +378,7 @@ class app(baseClass):
         return con
    
     def _prepare_main_screen(self,table):
+        t = 0.01
         lst = []
         lst.append(time.localtime().tm_hour)
         lst.append(time.localtime().tm_min)
@@ -387,7 +389,7 @@ class app(baseClass):
         program = cur.fetchone()        
         program = program[0]
         lst.append(program)
-        time.sleep(1)
+        time.sleep(t)
         #con.close()
         
            
@@ -403,7 +405,7 @@ class app(baseClass):
         lst.append(heat)
         lst.append(man)
         lst.append(0)
-        time.sleep(1)
+        time.sleep(t)
         #con.close()
         
         #con = self._get_connection(table)
@@ -411,7 +413,7 @@ class app(baseClass):
         cur.execute("select  value from temperatures where cas = (select cas from temperatures where sensor = 201 order by cas desc limit 1)")
         water = cur.fetchone()
         water = water[0] * 2
-        time.sleep(1)
+        time.sleep(t)
         #con.close()
 
         lst.append(water)
@@ -421,7 +423,7 @@ class app(baseClass):
         cur = con.cursor()
         cur.execute("select event from events where (pipe = 201 and event_id = 300) order by cas limit 1")
         ja = cur.fetchone()
-        time.sleep(1)
+        time.sleep(t)
         #con.close()
         alive = ja[0]
         lst.append(alive)
@@ -433,7 +435,7 @@ class app(baseClass):
         topit = cur.fetchone()
         topit = topit[0]
         lst.append(topit)
-        time.sleep(3)
+        time.sleep(t)
         con.close()
         
         return lst

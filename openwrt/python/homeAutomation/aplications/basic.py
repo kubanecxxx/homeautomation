@@ -16,7 +16,7 @@ class app(baseClass):
         baseClass.__init__(self,name,False)
         
         self.vmt[Hardware.NEW_DATA] = self.new_data
-        self._pipe_list = [2]
+        self._pipe_list = [8]
         
         pass
    

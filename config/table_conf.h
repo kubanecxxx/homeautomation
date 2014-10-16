@@ -26,6 +26,7 @@ typedef enum nrf_commands_t
 	DATE_YEAR = 6,
 	DATE_WEEK_DAY = 7,
 	DATE_YEAR_DAY = 8,
+	TIME_SINCE_EPOCH = 9,
 
 //termostat
 	KOTEL_TOPIT = 100,			//payload 1byte 1-topit 0-netopit
@@ -47,6 +48,8 @@ typedef enum nrf_commands_t
 	HANDLE_RELOAD_HEATING_SCREEN_WEEKEND = 52,
 	HANDLE_RELOAD_WATER_SCREEN = 53,
 
+//clocks
+
 
 	DATA_ERROR = 500,
 	DATA_COUNT_ERROR = 501
@@ -62,5 +65,6 @@ typedef struct config_table_t
 
 extern const config_table_t config_table_kotel;
 extern const config_table_t config_table_handle;
+extern const config_table_t config_table_watches;
 
 #endif

@@ -31,6 +31,7 @@ class commands:
     DATE_YEAR = 6
     DATE_WEEK_DAY = 7
     DATE_YEAR_DAY = 8
+    TIME_SINCE_EPOCH = 9
     
         
     #termostat
@@ -55,15 +56,18 @@ class commands:
 
     PIPE_KOTEL = 1
     PIPE_OVLADAC = 0
+    PIPE_HODINY = 2
     
     stations_db_ids = {}
     stations_db_ids[PIPE_KOTEL] = 201
     stations_db_ids[PIPE_OVLADAC] = 200
+    stations_db_ids[PIPE_HODINY] = 202
     
     
     stations = {}
     stations[PIPE_KOTEL] = "kotel"
     stations[PIPE_OVLADAC] = "ovladac"
+    stations[PIPE_HODINY] = "hodiny"
     
     db_address = ""
     db_name = ""
