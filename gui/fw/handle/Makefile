@@ -117,14 +117,30 @@ INCDIR += $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) gui porting 
          
 
-USE_ST775=yes
+
+
+#
+# Multi library configuration
+##############################################################################
+
 LIBRARIES = $(HOME)/elektronika/homeAutomation/library
+USE_ST775=yes
+USE_FONTS = yes
+USE_SCHEDULER = yes
+USE_RF24_CALLBACKS = yes
+USE_TEMPERATURE_I2C = yes
+
+
 include $(LIBRARIES)/rules.mk
 include $(LIBRARIES)/../config/rules.mk
 
+#
+# Piris configuration
+##############################################################################
+
 PIRIS = $(HOME)/elektronika/homeAutomation/piris/framework
-#PIRIS = framework
 include $(PIRIS)/rules.mk
+
 
 CSRC +=  $(CFILES) porting/st7735_port.c
 CPPSRC += $(CPPFILES) 

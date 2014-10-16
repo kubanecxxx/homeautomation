@@ -117,8 +117,15 @@ INCDIR += $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) temperature  relays
          
 
+#
+# Multi library configuration
+##############################################################################
 LIBRARIES = ../../../../library
+USE_SCHEDULER = yes
+USE_RF24_CALLBACKS = yes
+USE_TEMPERATURE_I2C = yes
 include $(LIBRARIES)/rules.mk
+
 include $(LIBRARIES)/../config/rules.mk
 
 CSRC +=  $(CFILES)
