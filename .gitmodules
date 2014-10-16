@@ -4,3 +4,6 @@
 [submodule "piris"]
 	path = piris
 	url = git@github.com:kubanecxxx/piris.git
+[submodule "matrix-digital-clock"]
+	path = matrix-digital-clock
+	url = git@github.com:kubanecxxx/matrix-digital-clock.git
