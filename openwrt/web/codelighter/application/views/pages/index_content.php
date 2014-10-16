@@ -109,16 +109,28 @@ echo form_dropdown_kuba('programy', $programy, $program->id, 'id="programy"');
 		<tr>
 			<td>
  
- <?php echo $this->termometer->getImg($arr[0]->value,False, "id=nevim"); ?>
+ <?php echo $this->termometer->getImg($arr[0]->value,False,15,1, "id=nevim"); ?>
     </td>
 			<td>
-<?php echo $this->termometer->getImg($arr[1]->value,True, "id=nevim"); ?>
+<?php echo $this->termometer->getImg($arr[1]->value,True,25,2, "id=nevim"); ?>
 </td>
 
 		</tr>
+		<tr>
+	<td></td>
+	<td style>
+<?php 
+if ($zije->event == 0)
+    echo "nefungujeme od ".$zije->cas;
+?>	
+	</td>
+		</tr>
 	</table>
 
+
 </div>
+
+
 
 <div class="moje"></div>
 
