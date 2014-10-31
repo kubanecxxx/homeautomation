@@ -3,10 +3,6 @@
 	src="<?php echo base_url();?>application/views/fire-0.62.min.js"></script>
 
 <script>
-<?php //echo $topit; ?>
-
-
-
 
 function showing(){
 	
@@ -35,8 +31,11 @@ function showing(){
 }
 
 	   var topit = <?php Print($topit);?>
+	   //var topit = 1
 
 	$(document).ready( function(){
+		showing();
+
 		$('.fire').fire({
 			speed:80,
 			maxPow:7,
@@ -61,16 +60,12 @@ function showing(){
 			$('.fire').fire('stop');
 		}
 
-		showing();
+		
 		
 	});
 
     </script>
 
-<div id=divCenter class=fire></div>
-
-<div id=divCenter>
-       
 
 
 
@@ -78,11 +73,12 @@ function showing(){
 
 
 <table>
-		<tr>
+	<caption style="text-decoration: underline; padding-bottom: 10px">Hlavní
+		nabídka</caption>
+	<tr>
 
-			<td>
+		<td>
 <?php
-
 
 // rint_r($teploty);
 // echo $this->table->generate($teploty->result_array());
@@ -92,50 +88,67 @@ $attr = array(
 );
 echo form_open("termostat/submit_program", $attr);
 
-echo form_dropdown_kuba('programy', $programy, $program->id, 'id="programy"');
+echo form_dropdown_kuba('programy', $programy, $program->id, "id=programy class=jupi");
 ?>
 
-</td><td>
-<?php echo form_submit('submit', 'Zvolit program', 'id="submita"');?>
-
-<?php echo form_close();
-?>
 </td>
-</tr>
-<tr>
-<td><?php echo form_input('zadanaTeplota', 0, 'id="zadanaTeplota"');?></td>
-<td></td>
-		</tr>
-		<tr>
-			<td>
+		<td>
+<?php echo form_submit('submit', 'Zvolit program', 'id="submita" class="jupi"');?>
+
+
+</td>
+	</tr>
+	<tr>
+		<td><?php
+$a["name"] = "teplota";
+$a["value"] = "0.0";
+$a["type"] = "number";
+$a["id"] = "zadanaTeplota";
+$a["min"] = "0";
+$a["step"] = "0.5";
+$a["class"] = "jupi";
+echo form_input($a);
+?>
+<?php
+
+
+echo form_close();
+?>
+
+</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>
  
  <?php echo $this->termometer->getImg($arr[0]->value,False,15,1, "id=nevim"); ?>
     </td>
-			<td>
-<?php echo $this->termometer->getImg($arr[1]->value,True,25,2, "id=nevim"); ?>
+		<td>
+<?php echo $this->termometer->getImg($arr[1]->value,True,25,2, "id=nevim "); ?>
 </td>
 
-		</tr>
-		<tr>
-	<td></td>
-	<td style>
-<?php 
+	</tr>
+	<tr>
+		<td></td>
+		<td style>
+<?php
 if ($zije->event == 0)
-    echo "nefungujeme od ".$zije->cas;
+    echo "nefungujeme od " . $zije->cas;
 ?>	
 	</td>
-		</tr>
-	</table>
+	</tr>
+</table>
 
 
-</div>
 
+<div id=divNeco class=fire></div>
 
 
 <div class="moje"></div>
 
 
 <script type="text/javascript">
+/*
 $('#submita').click(function() {
         var program_id = $('#programy').val();
         var temp = $('#zadanaTeplota').val();
@@ -158,7 +171,7 @@ $('#submita').click(function() {
                 
         return false;
 });
-
+*/
 $('select#programy').change(showing);
 
 var timer = null;

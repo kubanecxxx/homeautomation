@@ -50,6 +50,7 @@ class termostat extends CI_Controller
 
     public function submit_program()
     {
+        
         $this->load->model('termostat_model');
         
         $par = $this->input->post();
@@ -87,7 +88,70 @@ class termostat extends CI_Controller
     {
         if ($cislo)
             echo $cislo;
-        $this->load->library("termometer");
-        $this->_page();
+        $this->load->model('termostat_model');
+        $data['teploty'] = $this->termostat_model->getVodaScreen();
+        $this->_page($data);
+    }
+    
+    public function submit_voda()
+    {
+        $par = $this->input->post();
+              
+        $data2[0]->start= $par["start_0"];
+        $data2[1]->start= $par["start_1"];
+        $data2[0]->stop= $par["stop_0"];
+        $data2[1]->stop= $par["stop_1"];
+        $data2[0]->teplota=$par["teplota"];
+        $data2[1]->teplota=$par["teplota"];
+        
+        $this->load->model('termostat_model');
+        $this->termostat_model->setVodaData($data2);
+        redirect("termostat/voda/");
+        
+    }
+    
+    public function topeni()
+    {
+        $this->load->model('termostat_model');
+        $week = $this->termostat_model->getHeatingData(false);
+        $weekend = $this->termostat_model->getHeatingData(true);
+        
+        $r[0] = $week;
+        $r[1] = $weekend;
+        $data['rows'] = $r;
+        $this->_page($data);
+    }
+    
+    public function submit_heating()
+    {
+        $par = $this->input->post();
+        
+        unset($par["submit"]);
+        
+        
+        foreach($par as $key => $value)
+        {
+            $k = (int)($key / 2);            
+            if ($key % 2 == 0)
+            {
+                $s = $value;
+                $output[$k]->start = $s;
+            }
+            else
+            {
+                $t = $value;
+                $output[$k]->temperature = $t;
+            }
+            
+            $w = 0;
+            if ($k > 3)
+                $w = 1;
+            
+            $output[$k]->weekend = $w;            
+        }
+            
+        $this->load->model('termostat_model');
+        $this->termostat_model->setHeatingData($output);
+        redirect("termostat/topeni/");
     }
 }

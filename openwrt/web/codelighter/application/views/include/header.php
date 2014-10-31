@@ -17,6 +17,7 @@ if (preg_match('/(android|bb\d+|meego).+mobile| avantgo|bada\/|blackberry|blazer
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><?php echo $title;?></title>
 
+
 <link rel="stylesheet"
 	href="<?php echo base_url();?>css/<?php echo $styles;?>"
 	type="text/css"  />
@@ -29,6 +30,7 @@ if (isset($zo)) {
      echo '<meta name="viewport" content="width=device-width, user-scalable=no">';
 }
 ?>
+
 
 
 </head>

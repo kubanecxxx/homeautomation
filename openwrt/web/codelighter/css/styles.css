@@ -2,55 +2,80 @@
 
 body {
 	background-color: #000000;
-	color : white;
-	margin:0px;
-	padding:0px;
+	color: white;
+	margin: 0px;
+	padding: 0px;
+}
+
+table
+{
+	text-align: left;
 }
 
 #divCenter {
+	/*
 	position: absolute;
-	/*top: 50%;*/
 	left: 50%;
-	/*margin-top: -110px;*/
 	margin-left: -125px;
 	width: 250px;
 	height: 280px;
-	/*border: 1px dashed;*/
 	padding: 10px
-}
-
-li#header_item
-{
-	display:inline;
-	padding-left:20px;
-}
-
-ul#header_items
-{
-	position:absolute;
-	right:50px;
+	*/
+	display: inline-block;
 	
-	margin:0px
+}
+
+
+#divNeco {
+	
+	
+	/*
+	position: absolute;
+	left: 50%;	
+	margin-left: -125px;
+	*/
+	
+	width: 100%;
+	height: 30px;
+	padding: 0px;
+	
+	display:inline-block
+
+}
+
+div#main_content {
+	width:	100%;
+	text-align: center;
+}
+
+
+li#header_item {
+	display: inline;
+	padding-left: 20px;
+}
+
+ul#header_items {
+	position: absolute;
+	right: 50px;
+	margin: 0px
 }
 
 div#header {
-	/*border-bottom : 1px solid;*/	
-	width :100%;
-	height : 20px;
+	/*border-bottom : 1px solid;*/
+	width: 100%;
+	height: 20px;
 	/*background-color: #dddddd;*/
-	color:grey;
-	
+	color: grey;
 }
 
 div#footer {
-	position:absolute;
-	bottom :0px;
+	position: absolute;
+	bottom: 0px;
 	height: 30px;
-	width:100%;
+	width: 100%;
 }
 
-#a_header 
-{
+#a_header {
 	color: #80ff80;
 }
 
@@ -62,6 +87,7 @@ input#zadanaTeplota {
 	width: 105px;
 }
 
-select#programy {
+.jupi 
+{
 	width: 100%;
 }

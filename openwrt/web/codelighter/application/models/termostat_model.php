@@ -31,11 +31,11 @@ class termostat_model extends CI_Model
 
     function getTemperatures()
     {
-        $q = $this->db->query("select temperatures.sensor,value value, cas from temperatures inner join (select temperatures.sensor, max(cas) as ts from temperatures group by temperatures.sensor) maxt on (maxt.sensor=temperatures.sensor and maxt.ts = temperatures.cas  ) order by sensor ");      
-        #$q = $this->db->query("call sp_lastTemperatures()");
+        $q = $this->db->query("select temperatures.sensor,value value, cas from temperatures inner join (select temperatures.sensor, max(cas) as ts from temperatures group by temperatures.sensor) maxt on (maxt.sensor=temperatures.sensor and maxt.ts = temperatures.cas  ) order by sensor ");
+        // q = $this->db->query("call sp_lastTemperatures()");
         return $q;
     }
-    
+
     function vata()
     {
         $a = $this->db->query("select * from temperatures limit 1");
@@ -53,25 +53,69 @@ class termostat_model extends CI_Model
         $programy = $this->db->query('call sp_getProgramyNames()');
         
         foreach ($programy->result() as $row) {
-            $data[$row->id] = array($row->name,$row->teplota);
+            $data[$row->id] = array(
+                $row->name,
+                $row->teplota
+            );
         }
         
         return $data;
     }
-    
+
     function setManualTemperature($temp)
     {
-        $sql = sprintf('update programy set teplota = %d where id = 1',$temp);
+        $sql = sprintf('update programy set teplota = %d where id = 1', $temp);
         $this->db->query($sql);
     }
-    
+
     function heatingIsAlive()
     {
         $query = "select event,cas from events where event_id = 300 and pipe = 201 order by cas desc limit 1";
         $a = $this->db->query($query);
         $b = $a->result();
         $b = $b[0];
-
+        
         return $b;
+    }
+
+    function getVodaScreen()
+    {
+        // t1,t2 start stop
+        // teplota
+        // hlidat teplotu
+        $query = "select teplota,start,stop,number from programy where id = 2";
+        $a = $this->db->query($query);
+        $b = $a->result();
+        return $b;
+    }
+
+    function setVodaData($data)
+    {
+        for ($i = 0; $i < 2; $i ++) {
+            // print_r($data[$i]);
+            $d = $data[$i];
+            $query = sprintf("call sp_configureProgram(2,%f,\"%s\",\"%s\",NULL,%d)", $d->teplota, $d->start, $d->stop, $i);
+            // echo $query;
+            $this->db->query($query);
+        }
+    }
+
+    function getHeatingData($weekend)
+    {
+        // hlidat teplotu
+        $query = sprintf("select teplota,start,stop,number from programy where id = 3 and weekend = %d order by number asc", $weekend);
+        $a = $this->db->query($query);
+        $b = $a->result();
+        return $b;
+    }
+
+    function setHeatingData($data)
+    {
+        for ($i = 0; $i < count($data); $i ++) {
+            $d = $data[$i];
+            $query = sprintf("call sp_configureProgram(3,%f,\"%s\",NULL,%d,%d)", $d->temperature, $d->start, $d->weekend, $i % 4);
+            
+            $this->db->query($query);
+        }
     }
 }
