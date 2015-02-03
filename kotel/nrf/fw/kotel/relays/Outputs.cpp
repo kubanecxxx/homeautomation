@@ -16,13 +16,18 @@ Outputs::Outputs(const config_t * config) :
 void Outputs::start()
 {
 	chDbgAssert(c,"config struct is NULL","");
-	timeout.Setup(kotel_timeout, this, S2ST(120), ONCE);
+	timeout.Setup(kotel_timeout, this, S2ST(360), ONCE);
 	cerpadlo.Setup(cerpadlo_timeout, this, S2ST(600), ONCE);
 
 	palSetPadMode(c->cerpadlo_port, c->cerpadlo_pin, PAL_MODE_OUTPUT_PUSHPULL);
 	palSetPadMode(c->kotel_port, c->kotel_pin, PAL_MODE_OUTPUT_PUSHPULL);
 	palClearPad(c->cerpadlo_port,c->cerpadlo_pin);
 	palClearPad(c->kotel_port,c->kotel_pin);
+}
+
+int Outputs::remains(void) const
+{
+	return (timeout.Remains() / CH_FREQUENCY);
 }
 
 void Outputs::topit(bool enable)

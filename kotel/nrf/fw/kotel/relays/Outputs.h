@@ -37,6 +37,7 @@ public:
 		return ((palReadLatch(c->kotel_port) >> c->kotel_pin) & 1);
 	}
 	void start();
+	int remains(void) const;
 
 private:
 	const config_t *c;
