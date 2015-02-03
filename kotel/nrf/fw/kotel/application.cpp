@@ -102,6 +102,7 @@ void topit_cb(packetHandling * , nrf_commands_t, void * data, uint8_t size,
 		return;
 
 	uint8_t topit = *((uint8_t *) data);
+	palTogglePad(TEST_LED_PORT3,TEST_LED_PIN3);
 
 	outs.topit(topit);
 }

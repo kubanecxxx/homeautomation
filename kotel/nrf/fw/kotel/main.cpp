@@ -46,7 +46,7 @@ void clear_watchdog(void)
 
 void state(bool ok)
 {
-	palWritePad(TEST_LED_PORT3,TEST_LED_PIN3,ok);
+//	palWritePad(TEST_LED_PORT3,TEST_LED_PIN3,ok);
 }
 
 static const packetHandling::function_table_t ph_ft =
