@@ -211,6 +211,7 @@ class Hardware:
         # @type command: int
         # @type payload: array
         
+
         cb = None
         args = None
         t = None

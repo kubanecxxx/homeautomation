@@ -31,7 +31,7 @@ class app(baseClass):
         #individual basic setup
         self.vmt[Hardware.NEW_DATA] = self.new_data
         self.vmt[Hardware.TX_FINISHED] = self.cosi
-        #self.vmt[Hardware.TX_FAILED] = self.err
+        self.vmt[Hardware.TX_FAILED] = self.err
         self._pipe_list = [1]
 
         self.i = 0
@@ -41,24 +41,6 @@ class app(baseClass):
         #logging.getLogger("root.serialHardware").setLevel(logging.ERROR)    
         
     def _idle_data(self,send,table,pipe,command,load):
-        
-        FORMAT = '%(asctime)s  [%(name)s]:[%(levelname)s] - %(message)s'
-        formater= logging.Formatter(FORMAT)
-        
-        self._log.handlers = []
-        self._log.setLevel(logging.NOTSET)
-        
-        try:
-            fh = logging.FileHandler("/dev/pts/0",'w')
-            fh.setFormatter(formater)
-            fh.setLevel(logging.DEBUG)
-                        
-            if len(self._log.handlers) == 0:
-                self._log.addHandler(fh)
-                self._log.setLevel(logging.INFO)
-        except:
-            pass
-        
         #send(pipe, table.KOTEL_TOPIT,0,1)
         #tady rozhodovat treba kazdej desatej poslat jesli topit nebo ne
         
@@ -66,7 +48,7 @@ class app(baseClass):
         #send(table.PIPE_KOTEL,table.MCU_RESET)
         #print_pts("idle from pipe %d" % pipe)
         
-        if (self._idle_count > 10):
+        if (self._idle_count > 2):
             con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek")
             cur = con.cursor()
             cur.execute("select sp_topit()");
@@ -112,14 +94,16 @@ class app(baseClass):
         self._command_table[table.KOTEL_CERPADLO] = self._new_cerpadlo
         self._command_table[table.KOTEL_TEMPERATURE] = self._new_temperature
 #        logging.getLogger("root").setLevel(logging.INFO)
+
         self._command_handler(args)
         
              
     def cosi(self,args):
-        self._log.info(str(args))
+        self._log.info("message succesfully sent" + str(args))
         
         pass
     
     def err(self,args):
+        self._log.info("transmitting failed " + str(args))
         print args
         

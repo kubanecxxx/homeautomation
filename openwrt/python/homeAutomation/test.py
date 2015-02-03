@@ -8,12 +8,13 @@ import logging
 import logging.handlers
 from dispatcher import dispatcher
 import time
-
+import logger.controller
 
 #singleton
 import fcntl
 import os
-pid_file = '/var/run/homeAutomation.pid'
+#pid_file = '/var/run/homeAutomation.pid'
+pid_file = '/tmp/homeautom.pid'
 fp = open(pid_file, 'w')
 try:
     fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -38,7 +39,7 @@ fh.setFormatter(formater)
 fh.setLevel(logging.WARN)
 fh_error.setFormatter(formater)
 fh_error.setLevel(logging.ERROR)
-cout = logging.StreamHandler()
+cout = logging.StreamHandler(sys.stderr)
 cout.setFormatter(formater)
 cout.setLevel(logging.WARN)
 
@@ -47,11 +48,13 @@ cout.setLevel(logging.WARN)
 print "Zdravim jak svina, deme na to!"
 
 a = logging.getLogger("root")
-a.setLevel(logging.WARN)
+a.setLevel(logging.DEBUG)
 
 a.addHandler(cout)
 a.addHandler(fh)
 a.addHandler(fh_error)
+
+jaja = logger.controller.loggerSetup()
 
 a.warn("application started")
 

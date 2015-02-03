@@ -40,23 +40,15 @@ class app(baseClass):
         
         #return
                 
-        try:
-            fh = logging.FileHandler("/dev/pts/1",'w')
-            fh.setFormatter(formater)
-            fh.setLevel(logging.INFO)
-                        
-            if len(self._log.handlers) == 0:
-                self._log.addHandler(fh)
-                self._log.setLevel(logging.INFO)
-        except:
-            pass
+        
         
     def _idle_data(self,send,table,pipe,command,load): 
         self._log.debug("idle from pipe %d" % pipe)
         
         if self._idle_count > 20:
             self._idle_count = 0 
-            t = int(time.time())
+            temp = 3600 * time.localtime().tm_isdst
+            t = int(time.time() ) + temp 
             send(pipe,table.TIME_SINCE_EPOCH,t,4)
             self._log.info("time sent to pipe %d" % pipe)
             
