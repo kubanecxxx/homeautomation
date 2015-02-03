@@ -71,13 +71,13 @@ void refresh_temp(arg_t)
 		ph.WriteData(KOTEL_TEMPERATURE, &tem, 2);
 		bool c = outs.getCerpadlo();
 
-		uint16_t ja = c;
+		uint32_t ja = c;
 		if (one > zero)
 			ja |= 2;
 		ja |= outs.getTopitLatch() << 2;
-		uint16_t secs = outs.remains() ;
-		ja |= (secs << 8);
-		ph.WriteData(KOTEL_CERPADLO, &ja, 2);
+		uint32_t secs = outs.remains() ;
+		ja |= (secs << 16);
+		ph.WriteData(KOTEL_CERPADLO, &ja,4 );
 
 		one = 0;
 		zero = 0;
