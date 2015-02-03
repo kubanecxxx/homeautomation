@@ -116,6 +116,12 @@ void serial::Loop(void)
 	}
 }
 
+
+void serial::ledTimeout(void * t)
+{
+	palClearPad(TEST_LED_PORT2, TEST_LED_PIN2);
+}
+
 void serial::check(void)
 {
 	uint8_t p;
@@ -139,6 +145,13 @@ void serial::check(void)
 		 rf->whatHappened(fin,fail,rx);
 		 }
 		 */
+		if (chVTIsArmedI(&ledVt))
+		{
+			chVTReset(&ledVt);
+		}
+		chVTSet(&ledVt,MS2ST(50),ledTimeout,this);
+		palSetPad(TEST_LED_PORT2, TEST_LED_PIN2);
+
 		if (output_enabled)
 			newRFData(p, payload, ize);
 

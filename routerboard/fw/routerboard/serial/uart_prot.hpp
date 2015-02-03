@@ -56,6 +56,8 @@ private:
 	VirtualTimer vt;
 	uint8_t channel;
 	systime_t elapsed;
+	VirtualTimer ledVt;
+	static void ledTimeout(void *d);
 
 	rf_packet ack_buffer;
 	bool output_enabled;
