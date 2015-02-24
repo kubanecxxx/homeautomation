@@ -69,7 +69,7 @@ class app(baseClass):
         pass
    
     def _new_cerpadlo(self,send,table,pipe,command,load):
-        if len(load) != 1:
+        if len(load) != 4:
             self._log.warning("cerpadlo new data - bad load length")
             return;
         
@@ -85,6 +85,13 @@ class app(baseClass):
         self._log_event_to_db(pipe,table, heating,301 )
         self._log_event_to_db(pipe,table, heating_latch,303 )
         #send(table.PIPE_KOTEL,table.MCU_RESET)
+        
+        a = load[2:]
+        ch = baseClass.getInt(a)
+        if heating_latch:
+            i = "disable time remains [seconds] %d " % ch
+            logging.getLogger("root.superSpecial").info(i)
+            
         
    
     def new_data(self,args):

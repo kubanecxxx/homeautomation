@@ -1,8 +1,21 @@
 '''
-Created on 30. 3. 2014
+@package docstring
+@date Created on 30. 3. 2014
 
 @author: kubanec
 '''
+
+##
+# @defgroup dispatcher_package
+# @brief   dynamic reloading of user modules, data frames distribution between
+# hardware and the user modules
+# @{
+
+##
+# @defgroup dispatcher
+# @brief reloading of user modules, intercommunication of those modules between
+# hardware
+# @{
 
 from hardware import serialHardware
 from threading import Thread,Lock
@@ -18,29 +31,49 @@ import inspect, os
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/.." # script directory
 
 
+##
+# @brief Dynamic reloading user modules and message distribution between
+# hardware and those modules 
+#
+#    Modules are added/reloaded automatically and on the fly (no restart needed)
+#
+#    Only one instance is used in whole application. 
 class dispatcher:
+    ##
+    # @brief message codes to user readable string conversion table
+    _table = {serialHardware.Hardware.NEW_DATA : "NEW_DATA", 
+             serialHardware.Hardware.ERROR: "ERROR",
+             serialHardware.Hardware.TX_FAILED: "TX_FAILED",
+             serialHardware.Hardware.TX_FINISHED: "TX_FINISHED"}
+
+    ## 
+    # @brief Initialize instance variables, create dedicated thread and
+    # create hardware class instance
     def __init__(self):
-        self._hw = serialHardware.Hardware(self._handle_events)
+        ## @brief hardware instance
+        self._hw = serialHardware.Hardware(self._handle_events) #hardware connector        
+        ## @brief dedicated thread
         self._thread = Thread(target=self._loop,name="dispatcher")
         self._thread.setDaemon(True)
+        ## @brief instance logger
         self._log = logging.getLogger("root.dispatcher")
         self._lock = Lock()
+        ## @brief list of user modules
         self._objects = {}
+        ## @brief command table
         self._command_table = commandTable.commands
         self._log_apps = logging.getLogger("root.apps")
-
         pass
     
+    ##
+    # @brief open hardware and start dedicated thread
     def start(self):
         self._hw.open("/dev/ttyUSB0")
         self._thread.start()
         pass
     
-    _table = {serialHardware.Hardware.NEW_DATA : "NEW_DATA", 
-             serialHardware.Hardware.ERROR: "ERROR",
-             serialHardware.Hardware.TX_FAILED: "TX_FAILED",
-             serialHardware.Hardware.TX_FINISHED: "TX_FINISHED"}
-    
+    ##
+    # @brief format serial data to command and payload
     def _format_serial_data(self, args):
         pipe = args[0]
         data = args[1]
@@ -54,6 +87,10 @@ class dispatcher:
         t = (self, pipe, command ,pole)
         return t
     
+    ##
+    # @brief receive callbacks from @ref hardware class and distribute
+    # data to the dynamically imported user modules
+    #
     def _handle_events(self, args):
         code = args[0]
         args = args[1]
@@ -110,6 +147,8 @@ class dispatcher:
         self._lock.release()
         
     
+    ##
+    # @brief  thread code checks for changes in user modules and @ref commandtable
     def _loop(self):
         while True:    
             try:
@@ -127,6 +166,10 @@ class dispatcher:
                 events.events.event.register_exit()
             
             
+    ##
+    # @brief refresh list of user modules in package @ref aplications
+    # search for new modules and dynamically import them and modified modules
+    # are dynamically reimported
     def _get_objects(self, objects):
         # @type objects: {}
         filename = os.path.abspath(path + "/aplications")
@@ -168,7 +211,15 @@ class dispatcher:
 
             
         return objects  
-                
+    
+    ##
+    #   @brief Used by user modules to send arbitrary data to the wireless modules
+    #   @param pipe [int]  Logical address of wireless module 
+    #    @param command [int]  Arbitrary command from @ref command_table
+    #    @param data [int/character array] User data array of bytes or integer which is automatically
+    #    converted to the byte of array
+    #    @param integerLength [int]  If data is integer it will be converted to specified 
+    #    number of bytes
     def send_packet(self, pipe, command, data = None, integerLength = None):
         # @type pipe: int 
         # @type command: int
@@ -201,6 +252,13 @@ class dispatcher:
          
         pass
     
+    ##
+    # @brief returns command table which is automatically reloaded after modification
+    #    on the fly
     @property
     def command_table(self):
         return self._command_table
+    
+    #@}
+    
+#@}

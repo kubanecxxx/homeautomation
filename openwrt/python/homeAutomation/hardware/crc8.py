@@ -1,5 +1,13 @@
 __author__ = 'kubanec'
 
+##
+# @addtogroup hardware
+# @{
+
+
+##
+# @brief class is used for CRC validation between router and wireless master module
+# via UART line
 class crc8:
 	def __init__(self):
 		self.crcTable = (0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15, 0x38,
@@ -42,3 +50,5 @@ class crc8:
 	def crcByte(self, oldCrc, byte):
 		res = self.crcTable[oldCrc & 0xFF ^ byte & 0xFF];
 		return res
+
+#@}
