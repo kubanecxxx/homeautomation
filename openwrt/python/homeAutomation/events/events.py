@@ -1,8 +1,7 @@
-'''
-Created on 28. 3. 2014
-
-@author: kubanec
-'''
+##
+# @defgroup Events
+# @brief simple event system
+# @{
 
 import Queue
 import pickle
@@ -10,6 +9,14 @@ import time
 import logging
 import threading
 
+##
+# @brief Event class 
+# constains simple api for registering callbacks which 
+# are called in @ref loop() method which is called in application 
+# main thread
+#
+# all methods are static - there is no need to instanciate class 
+# and register method can be used in whole application
 class event:
     _queue = Queue.Queue()
     _exit = True
@@ -17,6 +24,9 @@ class event:
     def __init__(self):
         pass
     
+    ##
+    # @brief this method is called in main thread and proccess
+    # the registered callbacks in queue
     @staticmethod
     def loop():
         #process callbacks from queue
@@ -30,12 +40,19 @@ class event:
             j = event._exit
         pass
     
+    ##
+    # @brief register method to the processing queue
+    # @param callback function or method to be called in main thread
+    # the callback function has to accept one argument
+    # @param args this argument is passed to the callback
     @staticmethod
     def register_event(callback, args):
         t = (callback,pickle.dumps(args))
         event._queue.put(t)
         pass
     
+    ##
+    # @brief if this method is called event loop will end
     @staticmethod
     def register_exit():
         event._exit = False
@@ -43,3 +60,5 @@ class event:
         logging.getLogger("root").exception("thread \"%s\" caused exception, application terminated",n)
         pass
     
+##
+# @}

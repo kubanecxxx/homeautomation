@@ -1,8 +1,8 @@
-'''
-Created on 30. 3. 2014
+##
+# @defgroup User_modules
+# @brief User space for creating his own modules to operate with slave wireless modules
+# @{
 
-@author: kubanec
-'''
 
 from hardware.serialHardware import Hardware
 import logging
@@ -13,6 +13,9 @@ import MySQLdb as mdb
 import fcntl
 import datetime
 
+##
+# @brief debugging function to print data to another terminal
+# @deprecated
 def print_pts(text):
     try:
         fp = open("/dev/pts/1", 'w')
@@ -21,6 +24,27 @@ def print_pts(text):
     except:
         return
     
+##
+# @brief helper function to log whatever into database if value is different 
+# then before 
+# @details
+# struct of the table in database:
+# | timestamp | ID | pipe | event | event_id |
+# <br> timestamp and ID are processed automatically by database
+# 
+# @todo forbid temperature table and transfer its data to events table
+#
+# @param base instance of caller class which inherits from @ref baseClass
+# @param pipe [int] logical address of wireless module written to "pipe" column
+# @param value [float] this value will be stored in "event" column
+# @param table [@ref command_table] table is needed to decode pipe identificator
+# @param parameter [string] name of "event" column
+# @param db_table [string] name of the table in database
+# @param tolerance [boolean] useful when logging temperature because 
+# the value moves by 0.5 degree down and up in short time. The value will be logged 
+# after two minutes if the new value is 0.5 degree different then previous value
+#
+# @deprecated use @ref baseClass method
 def log_to_db(base,pipe,value,table,parameter,db_table, tolerance = False):
     #writes data to database if value is different from last sample 
     
@@ -55,16 +79,38 @@ def log_to_db(base,pipe,value,table,parameter,db_table, tolerance = False):
     return query
 
 
+##
+# @brief main super class of all user modules 
+# User module class definition must be like <b>def class app(@ref baseClass)</b>, 
+# class name <b>app</b> is mandatory because @ref dispatcher searches for the
+# class name app
+#
+# main purposes are:
+#   + Creates subclass logger by module name
+#   + Optionaly checks if asociated wireless slave module is alive (timeout)
+#   + Distribution wireless commands via table of methods - user doesn't need to test 
+#   wireless command code in subclass. Module methods are called instead.
 class baseClass:
+    ##
+    # @brief initialise logger by subclass name
     def __init__(self, name, autoResponseCheck = True):
-        # args in tuple
+        ## @brief @ref serial_commands asociated dictionary to functions/methods to be called
+        # when data from asociated wireless module are received/tx finished or error occurs
+        # key is @ref serial_commands and value is method or function
+        # @details dictionary should look like this: 
+        # <br> @serparam
+        # by default all is set to None, when function/method is set to None it cannot be called
         self._vmt = {
                      Hardware.NEW_DATA : None,  # (dispatcher_instance, pipe, application_command, data)
                      Hardware.ERROR : None,  # (dispatcher_instance, error_code)
                      Hardware.TX_FAILED : None,  # (dispatcher_instance, pipe, application_command, data)
                      Hardware.TX_FINISHED : None  # (dispatcher_instance, pipe)
                      }
+        ## @brief user module name is taken from filename by dispatcher
         self._name = name
+        ## @brief asociated wireless modules with user module, when new data or other
+        # event occurs functions specified in @ref _vmt are called. If the pipe is not 
+        # listed here functions will not be called.
         self._pipe_list = []
         self._log = logging.getLogger("root.apps." + name)
         self._log.info("Instance created: %s", name)
@@ -79,6 +125,12 @@ class baseClass:
         #if autoResponseCheck:
         #    self._timer.start()        
     
+        ## @brief command_code to function dictionary @ref command_table is a key 
+        # and module function is value 
+        # 
+        # function style must be like this:
+        # method(function_for_sending_wireless_data, command_table, pipe, command, payload)       
+        # 
         self._command_table = {};
         self._log.handlers = []
         self._log.setLevel(logging.NOTSET)
@@ -116,6 +168,13 @@ class baseClass:
         
         return query
     
+    ##
+    # @brief checks if asociated wireless slave module is alive
+    # 10 seconds timeout no data from module
+    #
+    # if situation changes event will be logged into database by pipe number
+    # with event code 300
+    # @todo event codes into command_table
     def _check_response(self,pipe,table):    
         #self._timer.reset(5)
         if self._timer:
@@ -128,12 +187,16 @@ class baseClass:
         self._responding = True
         self._lock.release()
         
+        #event is internally logged after two hours if there is no change
         self._log_event_to_db(pipe, table, True, 300)
         #log_to_db(self, pipe, True, table,"zije","alive")
         if not ar:
             self._log.warning("Slave is alive now")
             
-        
+    ##
+    # @brief @ref _check_response timer callback 
+    # if the callback is called slave has not responded for 
+    # specified time (10 seconds) and event is logged into database
     def _check_resp_timeout(self,pipe,table):
         self._lock.acquire()
         self._responding = False
@@ -143,6 +206,9 @@ class baseClass:
         self._log_event_to_db(pipe, table, False, 300)
         pass
     
+    ##
+    # @brief slave state 
+    # @return slave status
     @property
     def responding(self):
         self._lock.acquire()
@@ -150,14 +216,21 @@ class baseClass:
         self._lock.release()
         return a
     
+    ## @brief returns @ref serial_commands functions dictionary
     @property
     def vmt(self):
         return self._vmt
     
+    ## @brief returns list of asociated wireless modules
     @property
     def pipe_list(self):
         return self._pipe_list
     
+    ##
+    # @brief conversion function from array of character
+    # creates integer 
+    # @param arr [array.array("c")] input byte array
+    # @return arr converted to integer
     @staticmethod
     def getInt(arr):
         if type(arr) is not array.array:
@@ -170,7 +243,15 @@ class baseClass:
             t |= j & 0xff
             
         return t
-            
+    
+    ##
+    # @brief this method is called by subclass in wireless recieved data callback
+    # and according to @ref _command_table asociated function is called 
+    # @param args [tuple(dispatcher, pipe, command, payload)]
+    #   + dispatcher - dispatcher instance 
+    #   + pipe - wireless data received from pipe
+    #   + command - command code @ref command_table
+    #   + payload - data
     def _command_handler(self, args):
         # @type dispatcher: dispatcher
         # @type pipe: int
@@ -197,3 +278,4 @@ class baseClass:
             f(send_function,table,pipe,command,payload)
 
 
+## @}

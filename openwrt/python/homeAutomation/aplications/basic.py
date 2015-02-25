@@ -1,8 +1,6 @@
-'''
-Created on 30. 3. 2014
-
-@author: kubanec
-'''
+## 
+# @defgroup User_modules
+# @{
 
 from hardware.serialHardware import Hardware
 from aplications.baseClass import baseClass
@@ -11,6 +9,8 @@ from dispatcher.dispatcher import dispatcher
 import logging
 import array
 
+##
+# @brief basic user module class used only for testing
 class app(baseClass):
     def __init__(self,name):
         baseClass.__init__(self,name,False)
@@ -34,3 +34,6 @@ class app(baseClass):
         print pipe
         
         pass 
+
+
+##  @}

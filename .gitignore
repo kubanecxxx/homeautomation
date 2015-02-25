@@ -6,4 +6,5 @@ build
 *.pyc
 *.s\#?
 *.b\#?
+docs/
 

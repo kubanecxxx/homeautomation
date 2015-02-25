@@ -1,5 +1,3 @@
-__author__ = 'kubanec'
-
 ##
 # @defgroup hardware
 # @brief Communicaion with hardware with (virtual) serial port 
@@ -18,37 +16,83 @@ from threading import Timer
 
 ##
 # @defgroup serial_commands
-# @brief serial frame commands - 1 byte
-# 
+# @brief serial frame description <b>the most crucial think - you don't need to
+# use this directly there is an API in @ref Hardware</b>
+#  
 # the 7th bit meaning:
 #    + 1 receive from USB/wireless adaptor
 #    + 0 sending to the adaptor
 # @details this table is basically the same in the USB/wireless adaptor
+# 
+# @note this module is basically the same in the USB/wireless adaptor MCU
+# firmware but the firmware is written in C so enum is used instead
+# 
+# Data structure of the serial frame (both directions are the same):
+# <table>
+# <tr>
+# <td> 1byte </td> <td> 1byte </td> <td> 1byte </td>
+# <td> according to the payload_size </td><td> 1byte </td>
+# </tr>
+# <tr>
+# <td>PREAMBLE 0x44 </td><td> @ref serial_commands code </td>
+# <td>payload size </td><td>payload </td><td> CRC</td>
+# </tr>
+# </table>
+#
 # @{
 
 ## @brief preamble is always on the start of any serial frame
 PREAMBLE = 0x44
 
 ## @brief send data to pipe
+#
+# NRF24L01 module can accept maximum data packet size 32bytes.
+# structure of serial payload is:
+#   + 1st payload byte is pipe - logical address of wireless slave module
+#   + 2nd - 33th wireless data itself
+#
+# so serial payload size can be at max 33 bytes, payload can be shorter. There
+# is no need to send all 32 bytes over air for nothing
 RF_SEND_PIPE = 0x00
 ## @brief force hardware to discard transmit buffer
+# no payload 
 RF_FLUSH_TX = 0x01
 ## @brief force hardware to discard receive buffer
+# no payload 
 RF_FLUSH_RX = 0x02
 ## @brief clear watchdog in hardware
+# no payload 
 RESET_WATCHDOG = 0x03
 ## @brief say to hardware to disable/enable serial data output 
+# 1 byte payload:
+#   + 0 disable output
+#   + 1 enable output
 DISABLE_NEW_DATA_OUTPUT = 0x04
 
 ## @brief new wireless data from hardware
+# 
+# same behaviour like @ref RF_SEND_PIPE
 RF_NEW_DATA = 0x80
 ## @brief hardware has empty transmitting buffer
+# 
+# one payload byte - pipe number module which data was sent to
 RF_TX_END = 0x81
 ## @brief crc validation in hardware failed
+#
+# it is not used by application just log message is created
+#
+# @todo how does it work? who knows
 CRC_FAILED = 0x82
-## @brief this application sent invalid data
+## @brief this application sent invalid data to hardware and the hardware is 
+# angry
+#
+# it is not used by this application
+#
+# @todo how does it work? does anybody know?
 INVALID_COMMAND = 0x83
-## @brief send by hardware on startup
+## @brief sent by hardware on startup
+#
+# no payload
 HARDWARE_STARTUP = 0x84
 
 ##

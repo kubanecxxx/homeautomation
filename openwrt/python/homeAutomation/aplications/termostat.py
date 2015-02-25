@@ -1,8 +1,6 @@
-'''
-Created on 30. 3. 2014
-
-@author: kubanec
-'''
+##
+# @defgroup User_modules
+# @{ 
 
 from hardware.serialHardware import Hardware
 from aplications.baseClass import baseClass, log_to_db,print_pts
@@ -14,7 +12,9 @@ import time
 import MySQLdb as mdb
 from dispatcher import commandTable
 
-
+##
+# @brief helper function to log temperature recieved from wireless slave module
+# to database
 def log_temperature(base,pipe,load,table):
     if (len(load) != 2):
         return
@@ -24,6 +24,8 @@ def log_temperature(base,pipe,load,table):
     base._log.debug(teplota)
         
     
+##
+# @brief termostat module class
 class app(baseClass):
     def __init__(self,name):
         baseClass.__init__(self,name)
@@ -32,6 +34,8 @@ class app(baseClass):
         self.vmt[Hardware.NEW_DATA] = self.new_data
         self.vmt[Hardware.TX_FINISHED] = self.cosi
         self.vmt[Hardware.TX_FAILED] = self.err
+    
+        ## @brief asociated wireless module has logical address 1
         self._pipe_list = [1]
 
         self.i = 0
@@ -40,10 +44,14 @@ class app(baseClass):
                 
         #logging.getLogger("root.serialHardware").setLevel(logging.ERROR)    
         
+    ##
+    # @wireless
+    #
+    # @brief idle_data 
+    # every 5 idle packets received is checked from database if heating
+    # should be enabled or disabled and this information is sent to the 
+    # hardware
     def _idle_data(self,send,table,pipe,command,load):
-        #send(pipe, table.KOTEL_TOPIT,0,1)
-        #tady rozhodovat treba kazdej desatej poslat jesli topit nebo ne
-        
         self._log.debug("idle from pipe %d" % pipe)
         #send(table.PIPE_KOTEL,table.MCU_RESET)
         #print_pts("idle from pipe %d" % pipe)
@@ -64,10 +72,34 @@ class app(baseClass):
             
         return
     
+    ##
+    # @wireless
+    #
+    # @brief temperature of water in hot water container
+    # 
+    # temperature is logged into the database
     def _new_temperature(self,send,table,pipe,command,load):
         (log_temperature(self,pipe, load, table))
         pass
    
+    ## 
+    # @wireless
+    #
+    # @brief state of binary inputs and outputs (cerpadlo means water pump in
+    # czech language
+    #
+    # load contains these common data:
+    #   + water pump state (disabled/enabled) bit 0
+    #   + heating status (really burns or not - taken directly from heating via
+    #   optocoupler) bit 1
+    #   + heating relay output latch (latch from the microprocessor output) it
+    #   is used for debugging  bit 2
+    #   + upper two bytes contains remaing time in seconds when heating should
+    # be turned off automatically by microcontroller timeout - if
+    # microcontroller does not recieve command to enable heating it will
+    # automatically disable heating after 6 minutes.
+    #
+    # states of those binary inputs/outputs are logged into database
     def _new_cerpadlo(self,send,table,pipe,command,load):
         if len(load) != 4:
             self._log.warning("cerpadlo new data - bad load length")
@@ -93,7 +125,11 @@ class app(baseClass):
             logging.getLogger("root.superSpecial").info(i)
             
         
-   
+    ##
+    # @serial
+    #
+    # @brief new wireless data received 
+    # prepare @ref baseClass._command_table and call @ref baseClass._command_handler
     def new_data(self,args):
         dispatcher = args[0]
         table = dispatcher.command_table()
@@ -104,13 +140,25 @@ class app(baseClass):
 
         self._command_handler(args)
         
-             
+    ##
+    # @serial
+    #
+    # @brief transmition success
+    # do nothing
     def cosi(self,args):
         self._log.info("message succesfully sent" + str(args))
         
         pass
     
+    ##
+    # @serial
+    #
+    # @brief transmition error
+    # do nothing
     def err(self,args):
         self._log.info("transmitting failed " + str(args))
         print args
         
+
+
+## @}

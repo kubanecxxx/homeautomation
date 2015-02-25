@@ -1,3 +1,4 @@
+
 __author__ = 'kubanec'
 
 
@@ -70,3 +71,29 @@ except KeyboardInterrupt:
 except:
     a.exception("application crashed")
 
+
+##
+# @mainpage Application classes colaboraiton
+#
+# @todo dot with colaboration
+# @dot
+# digraph jouda {
+# node[shape=record]
+# hw[label="Hardware" URL = "@ref hardware"]
+# } 
+# @enddot
+# 
+# user modules inherits from base class
+# those modules are called from dispatcher method which is called from event
+# loop -main thread; the events are registered from hardware module - receive
+# direction; transmit direction user modules call dispatcher function for
+# sending a data to wireless slaves this function calls hardware method which
+# register this request to the sending queue which is one by one processed and
+# emptied
+# line between hardware and dispatcher is dispatcher codes set
+# hardware uses serial codes for himself
+# line between dispatcher communicate with user modules (base class) via
+# dispatcher codes 
+# base class distributes wireless data to user modules via @ref command_table codes
+# nothing else then simple dictionary with integers and methods 
+# dispatcher datas are directly passed to the user modules via _vmt

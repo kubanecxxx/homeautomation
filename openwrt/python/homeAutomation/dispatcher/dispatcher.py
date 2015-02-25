@@ -1,14 +1,10 @@
-'''
-@package docstring
-@date Created on 30. 3. 2014
-
-@author: kubanec
-'''
 
 ##
 # @defgroup dispatcher_package
 # @brief   dynamic reloading of user modules, data frames distribution between
 # hardware and the user modules
+#
+#
 # @{
 
 ##
@@ -67,6 +63,7 @@ class dispatcher:
     
     ##
     # @brief open hardware and start dedicated thread
+    # @todo serial port into config file
     def start(self):
         self._hw.open("/dev/ttyUSB0")
         self._thread.start()
@@ -148,7 +145,7 @@ class dispatcher:
         
     
     ##
-    # @brief  thread code checks for changes in user modules and @ref commandtable
+    # @brief  thread code checks for changes in user modules and @ref command_table
     def _loop(self):
         while True:    
             try:
