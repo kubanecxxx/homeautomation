@@ -75,25 +75,62 @@ except:
 ##
 # @mainpage Application classes colaboraiton
 #
-# @todo dot with colaboration
+# <h1>Class colaboration diagram</h1>
 # @dot
-# digraph jouda {
+# digraph classess {
 # node[shape=record]
 # hw[label="Hardware" URL = "@ref hardware"]
+# event[label="Event loop" URL = "@ref events.events.event" shape=Mrecord]
+# dispatcher[label="Dispatcher" URL = "@ref dispatcher.dispatcher.dispatcher"]
+# base[label="Base class" URL = "\ref aplications.baseClass.baseClass"]
+# user[label="User modules" URL = "@ref User_modules"]
+#
+# hw -> event-> dispatcher [label="Dispatcher codes callbacks \n through event loop " URL = "@ref dispatcher_codes"] 
+# dispatcher -> user [label="Dispacher codes through virtual methods" URL="@ref aplications.baseClass.baseClass"]
+# user -> base [label="Inherits from"]
 # } 
 # @enddot
+#
+# <h1>Thread colaboration diagram</h1>
+# @dot
+# digraph threads {
+# node [shape=record]
+# subgraph clustermain_thread {
+# main[label="Event loop" URL = "@ref events.events.event"]
+# dispatcher[label="Dispatcher" URL = "@ref dispatcher.dispatcher.dispatcher"]
+# user[label="User modules" URL = "@ref User_modules"]
+# main -> dispatcher [label = "Queue pop"]
+# dispatcher -> user
+# label="Main thread"
+# color=lightgrey
+# } 
+#
+# subgraph clusterhardware {
+# color=transparent
+# recieving[label="Hardware data receiving\n and decoding thread" URL = "@ref hardware.serialHardware.Hardware"]
+# sending[label="Wireless data sending thread" URL="@ref hardware.serialHardware.Hardware"]
+# }
 # 
-# user modules inherits from base class
-# those modules are called from dispatcher method which is called from event
-# loop -main thread; the events are registered from hardware module - receive
-# direction; transmit direction user modules call dispatcher function for
-# sending a data to wireless slaves this function calls hardware method which
-# register this request to the sending queue which is one by one processed and
-# emptied
-# line between hardware and dispatcher is dispatcher codes set
-# hardware uses serial codes for himself
-# line between dispatcher communicate with user modules (base class) via
-# dispatcher codes 
-# base class distributes wireless data to user modules via @ref command_table codes
-# nothing else then simple dictionary with integers and methods 
-# dispatcher datas are directly passed to the user modules via _vmt
+# recieving -> main [label="Queue put"]
+# dispatcher -> sending [label="Queue"] 
+# }
+# @enddot
+#
+# All user modules inherits from @ref aplications.baseClass.baseClass
+# Base class distributes wireless data which are received through @ref
+# dispatcher_codes to user modules via virtual mehtods 
+# which do nothing in default implementation in baseClass.
+# Those virtual methods are called from dispatcher method @ref
+# dispatcher.dispatcher.dispatcher._handle_events which is called from @ref
+# events.events.event.loop function. This function is called directly from main
+# application thread. Events are registered from @ref
+# hardware.serialHardware.Hardware._do_packet function which runs in dedicated
+# thread for receiving data from serial channel. That is <b>receive
+# direction</b> from wireless slave modules.
+#
+# <b>Transmit direction</b> to wireless slave modules behaves differently. User modules just use
+# dispatcher method @ref dispatcher.dispatcher.dispatcher.send_packet which
+# calls hardware method @ref hardware.serialHardware.Hardware.put_ack_payload.
+# This method register sending request to a request queue. Requests are one by
+# one processed and the queue is emptied step by step.
+# 

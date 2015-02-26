@@ -134,6 +134,7 @@ class dispatcher:
             vmt = f.vmt
             cb = vmt[code]
             # @type lst: []
+            #
 
             try:
                 if cb is not None:

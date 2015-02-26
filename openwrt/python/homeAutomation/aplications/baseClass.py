@@ -94,12 +94,13 @@ class baseClass:
     ##
     # @brief initialise logger by subclass name
     def __init__(self, name, autoResponseCheck = True):
-        ## @brief @ref serial_commands asociated dictionary to functions/methods to be called
+        ## @brief @ref dispatcher_codes asociated dictionary to functions/methods to be called
         # when data from asociated wireless module are received/tx finished or error occurs
         # key is @ref serial_commands and value is method or function
         # @details dictionary should look like this: 
         # <br> @serparam
         # by default all is set to None, when function/method is set to None it cannot be called
+        # @todo destroy it and use normal virtual function overriding instead with normal parameters  not tuple
         self._vmt = {
                      Hardware.NEW_DATA : None,  # (dispatcher_instance, pipe, application_command, data)
                      Hardware.ERROR : None,  # (dispatcher_instance, error_code)
