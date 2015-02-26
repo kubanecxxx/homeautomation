@@ -244,7 +244,8 @@ ALIASES                = \
 " \
 "wireless= @wparam @note wireless command received callback according the @ref baseClass._command_table\n" \
 "serial=@note callback from @ref serial_hardware module according to the @ref baseClass._vmt \
-   @param args according to the type of command:\n @serparam"
+   @param args according to the type of command:\n @serparam" \
+"base_virtual = @note overriden method from @ref aplications.baseClass.baseClass "
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"

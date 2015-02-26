@@ -43,8 +43,8 @@ def print_pts(text):
 # @param tolerance [boolean] useful when logging temperature because 
 # the value moves by 0.5 degree down and up in short time. The value will be logged 
 # after two minutes if the new value is 0.5 degree different then previous value
-#
-# @deprecated use @ref baseClass method
+# @todo transfer temperature to events
+# @deprecated use @ref baseClass method instead
 def log_to_db(base,pipe,value,table,parameter,db_table, tolerance = False):
     #writes data to database if value is different from last sample 
     
@@ -94,23 +94,10 @@ class baseClass:
     ##
     # @brief initialise logger by subclass name
     def __init__(self, name, autoResponseCheck = True):
-        ## @brief @ref dispatcher_codes asociated dictionary to functions/methods to be called
-        # when data from asociated wireless module are received/tx finished or error occurs
-        # key is @ref serial_commands and value is method or function
-        # @details dictionary should look like this: 
-        # <br> @serparam
-        # by default all is set to None, when function/method is set to None it cannot be called
-        # @todo destroy it and use normal virtual function overriding instead with normal parameters  not tuple
-        self._vmt = {
-                     Hardware.NEW_DATA : None,  # (dispatcher_instance, pipe, application_command, data)
-                     Hardware.ERROR : None,  # (dispatcher_instance, error_code)
-                     Hardware.TX_FAILED : None,  # (dispatcher_instance, pipe, application_command, data)
-                     Hardware.TX_FINISHED : None  # (dispatcher_instance, pipe)
-                     }
         ## @brief user module name is taken from filename by dispatcher
         self._name = name
         ## @brief asociated wireless modules with user module, when new data or other
-        # event occurs functions specified in @ref _vmt are called. If the pipe is not 
+        # event occurs virtual methods are called. If the pipe is not 
         # listed here functions will not be called.
         self._pipe_list = []
         self._log = logging.getLogger("root.apps." + name)
@@ -135,7 +122,73 @@ class baseClass:
         self._command_table = {};
         self._log.handlers = []
         self._log.setLevel(logging.NOTSET)
+
+    ## 
+    # @defgroup Virtual_methods
+    # @brief virtual methods set is overriden by subclasses of baseClass. It is API for
+    # receiving callbacks from hardware layer. Default implementations just
+    # create log message that the unimplemented function was called.
+    # @{
+
+    ##
+    # @brief this method is supposed to be reimplemented by 
+    # subclass to receive data from asociated wireless module
+    # @param dispatcher instance of master @ref dispatcher.dispatcher.dispatcher
+    # @param pipe [int] logical address of wireless slave module which sent the
+    # packet
+    # @param command [int] @ref command_table value 
+    # @param payload [array.array("B")] payload data
+    def virtual_new_data(self, dispatcher, pipe, command, payload):
+        # @type dispatcher: dispatcher.dispatcher.dispatcher
+        # @type pipe: int
+        # @type command: int
+        # @type payload: array.array("B")
+        self._log.debug("unimplemented - default action; new data arrived")
+        pass
+
+    ##
+    # @brief this method is supposed to be reimpelemted by 
+    # subclass to receive information about data was sucesfully sent to 
+    # wireless module
+    # @param dispatcher instance of master @ref dispatcher.dispatcher.dispatcher
+    # @param pipe [int] logical address of wireless slave unit which data was
+    # successfully sent to
+    def virtual_tx_finished(self, dispatcher, pipe):
+        # @type dispatcher: dispatcher.dispatcher.dispatcher
+        # @type pipe: int
+        self._log.debug("unimplemented - default action; tx finished")
+        pass
+    ##
+    # @brief this method is supposed to be reimpelemted by 
+    # subclass to receive information about failed transmition to 
+    # slave wireless module
+    # @param dispatcher instance of master @ref dispatcher.dispatcher.dispatcher
+    # @param pipe [int] logical address of wireless slave module
+    # @param command [int] @ref command_table code
+    # @param data [array.array("B")] payload
+    def virtual_tx_failed(self,dispatcher, pipe, command, data):
+        # @type dispatcher: dispatcher.dispatcher.dispatcher
+        # @type pipe: int
+        # @type command: int
+        # @type data array.array("B")
+        self._log.debug("unimplemented - default action; tx failed")
+        pass
+
+    ## 
+    # @brief this method is supposed to be reimpelemted by 
+    # subclass to receive information that error occured in hardware 
+    # @param dispatcher instance of master @ref dispatcher.dispatcher.dispatcher
+    # @param error_code [int] error code from @ref hardware
+    def virtual_error(self,dispatcher, error_code):
+        # @type dispatcher: dispatcher.dispatcher.dispatcher
+        # @type error_code: int
+        self._log.debug("unimplemented - default action ; error")
+        pass
     
+    ## @}
+
+    ## 
+    # @sa @ref log_to_db
     def _log_event_to_db(self,pipe,table,event_value,event_id,tolerance = False):
         #writes data to database if value is different from last sample 
         idd = table.stations_db_ids[pipe]
@@ -217,11 +270,6 @@ class baseClass:
         self._lock.release()
         return a
     
-    ## @brief returns @ref serial_commands functions dictionary
-    @property
-    def vmt(self):
-        return self._vmt
-    
     ## @brief returns list of asociated wireless modules
     @property
     def pipe_list(self):
@@ -248,18 +296,15 @@ class baseClass:
     ##
     # @brief this method is called by subclass in wireless recieved data callback
     # and according to @ref _command_table asociated function is called 
-    # @param args [tuple(dispatcher, pipe, command, payload)]
-    #   + dispatcher - dispatcher instance 
-    #   + pipe - wireless data received from pipe
-    #   + command - command code @ref command_table
-    #   + payload - data
-    def _command_handler(self, args):
+    # @param dispatcher [@ref dispatcher.dispatcher.dispatcher] instance
+    # @param pipe [int] logical address of wireless slave module which sent the packet
+    # @param command [int] @ref command_table code of packet
+    # @param payload [array.array("B")] packet arbitrary data
+    def _command_handler(self, dispatcher, pipe, command, payload):
         # @type dispatcher: dispatcher
         # @type pipe: int
         # @type command: int
         # @type payload: array.array("B")
-        
-        dispatcher,pipe,command,payload = args
         table = dispatcher.command_table()
         send_function = dispatcher.send_packet
         t = command | table.WRITE_FLAG
@@ -279,4 +324,4 @@ class baseClass:
             f(send_function,table,pipe,command,payload)
 
 
-## @}
+#@}

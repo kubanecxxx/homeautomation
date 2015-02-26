@@ -27,6 +27,7 @@ except IOError:
     sys.exit(1)
 
 
+# setup logging facility
 FORMAT = '%(asctime)s  [%(name)s]:[%(levelname)s] - %(message)s'
 #logging.basicConfig(format=FORMAT)
 formater= logging.Formatter(FORMAT)
@@ -40,18 +41,22 @@ fh.setFormatter(formater)
 fh.setLevel(logging.WARN)
 fh_error.setFormatter(formater)
 fh_error.setLevel(logging.ERROR)
-cout = logging.StreamHandler(sys.stderr)
+cout = logging.StreamHandler(sys.stdout)
 cout.setFormatter(formater)
-cout.setLevel(logging.WARN)
+cout.setLevel(logging.DEBUG)
 
+stderr = logging.StreamHandler(sys.stderr)
+stderr.setLevel(logging.WARN)
 
-
-print "Zdravim jak svina, deme na to!"
+print "How are you doing everybody let's start "
 
 a = logging.getLogger("root")
+a.addHandler(stderr)
 a.setLevel(logging.DEBUG)
 
-a.addHandler(cout)
+logging.getLogger("root.apps").addHandler(cout)
+
+#a.addHandler(cout)
 a.addHandler(fh)
 a.addHandler(fh_error)
 
@@ -59,6 +64,7 @@ jaja = logger.controller.loggerSetup()
 
 a.warn("application started")
 
+# start the application 
 disp = dispatcher.dispatcher()
 disp.start()
 
@@ -86,7 +92,7 @@ except:
 # user[label="User modules" URL = "@ref User_modules"]
 #
 # hw -> event-> dispatcher [label="Dispatcher codes callbacks \n through event loop " URL = "@ref dispatcher_codes"] 
-# dispatcher -> user [label="Dispacher codes through virtual methods" URL="@ref aplications.baseClass.baseClass"]
+# dispatcher -> user [label="Virtual methods" URL="@ref Virtual_methods"]
 # user -> base [label="Inherits from"]
 # } 
 # @enddot
@@ -100,7 +106,7 @@ except:
 # dispatcher[label="Dispatcher" URL = "@ref dispatcher.dispatcher.dispatcher"]
 # user[label="User modules" URL = "@ref User_modules"]
 # main -> dispatcher [label = "Queue pop"]
-# dispatcher -> user
+# dispatcher -> user [label = "Overriden methods" URL = "@ref Virtual_methods" ]
 # label="Main thread"
 # color=lightgrey
 # } 

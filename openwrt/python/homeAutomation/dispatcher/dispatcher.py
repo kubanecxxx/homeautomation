@@ -65,7 +65,7 @@ class dispatcher:
     # @brief open hardware and start dedicated thread
     # @todo serial port into config file
     def start(self):
-        self._hw.open("/dev/ttyUSB0")
+        self._hw.open("/dev/ttyUSB1")
         self._thread.start()
         pass
     
@@ -96,6 +96,7 @@ class dispatcher:
         arg = None
         pipe = -1
         if code == self._hw.NEW_DATA:
+            #dispatcher, pipe, command, payload
             arg = self._format_serial_data(args)
             pipe = arg[1]
             self._log.debug("new packet pipe %d; command %d; load " + str(arg[3].tolist()),pipe,arg[2])
@@ -104,17 +105,20 @@ class dispatcher:
             pass
         elif code == self._hw.TX_FINISHED:
             #pipe number
+            # dispatcher, pipe
             arg = (self,args)
             pipe = args
             self._log.debug("Packet delivered to pipe %d", pipe)
             pass
         elif code == self._hw.TX_FAILED:
+            #dispatcher, pipe, command , payload
             arg = self._format_serial_data(args)
             pipe = arg[1]
             self._log.warning("packet delivery failed %d; command %d; load " + str(arg[3].tolist()),pipe,arg[2])
             pass
         elif code == self._hw.ERROR:
             #error code
+            # dispatcher, erroer code
             arg = (self, args)
             self._log.warning("Error from hardware " + str(args))
             pass
@@ -131,14 +135,18 @@ class dispatcher:
             if not pipe in lst and not code == self._hw.ERROR:
                 continue
             
-            vmt = f.vmt
+            # helper function table 
+            vmt = {}
+            vmt[self._hw.TX_FAILED] = f.virtual_tx_failed
+            vmt[self._hw.TX_FINISHED] = f.virtual_tx_finished
+            vmt[self._hw.ERROR] = f.virtual_error
+            vmt[self._hw.NEW_DATA] = f.virtual_new_data
             cb = vmt[code]
-            # @type lst: []
-            #
 
             try:
                 if cb is not None:
-                    cb(arg)
+                    # variable number of arguments as tuple
+                    cb(*arg)
             except:
                 self._log.exception("Application module \"%s\" raised exception in \"%s\" handler", f._name, exp)
                 f._log.exception("Raised exception")
@@ -146,7 +154,8 @@ class dispatcher:
         
     
     ##
-    # @brief  thread code checks for changes in user modules and @ref command_table
+    # @brief  @ref _thread code checks for changes in user modules and @ref command_table
+    # and reloads changed modules or table on the fly
     def _loop(self):
         while True:    
             try:

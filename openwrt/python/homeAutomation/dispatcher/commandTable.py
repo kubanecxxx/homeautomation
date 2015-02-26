@@ -90,12 +90,16 @@ class commands:
 
     wrt = 'OpenWrt'
     pc = 'kubanec-linux'
+    ntbk = 'kubanec-laptop'
+    db_address_list[ntbk] = "localhost"
     db_address_list[wrt] = "localhost"
     db_address_list[pc] = "192.168.1.1"
     db_name_list[wrt] = "root"
     db_name_list[pc] = "kubanec"
+    db_name_list[ntbk] = "kubanec"
     db_pass_list[wrt] = "heslo"
     db_pass_list[pc] = "kokot"
+    db_pass_list[ntbk] = "kokot"
     
     ##
     # @brief According to the hostname select database credentials

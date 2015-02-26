@@ -15,25 +15,29 @@ class app(baseClass):
     def __init__(self,name):
         baseClass.__init__(self,name,False)
         
-        self.vmt[Hardware.NEW_DATA] = self.new_data
-        self._pipe_list = [8]
-        
+        self._pipe_list = [0]
+        print "startup"
         pass
    
-    def new_data(self,args):
-        #@type dispatcher: dispatcher
-        #@type pipe: int
-        #@type command: int
-        #@type payload: array.array("B")
-        dispatcher,pipe,command,payload = args
+    ## 
+    # @base_virtual
+    def virtual_new_data(self, dispatcher, pipe, command, payload):
+        print pipe,command,payload
 
-        #print pipe
-        #print command
-        #print payload.tolist()
-        c = 7
-        print pipe
+   
+    ## 
+    # @base_virtual
+    def virtual_tx_finished(self, dispatcher, pipe):
+        print "test"
+    
+    ## 
+    # @base_virtual    
+    def virtual_tx_failed(self, dispatcher, pipe, command, data):
+        pass
+
+    ## 
+    # @base_virtual
+    def virtual_error(self, dispatcher, error_code):
+        pass
         
-        pass 
-
-
 ##  @}

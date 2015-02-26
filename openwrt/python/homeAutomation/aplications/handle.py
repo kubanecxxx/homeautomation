@@ -115,10 +115,8 @@ class app(baseClass):
         baseClass.__init__(self,name)
         
         #individual basic setup
-        self.vmt[Hardware.NEW_DATA] = self.new_data
-        self.vmt[Hardware.TX_FINISHED] = self.cosi
         #self.vmt[Hardware.TX_FAILED] = self.err
-        self._pipe_list = [0]
+        self._pipe_list = [7]
 
         self.i = 0
         self._idle_count = 0
@@ -159,8 +157,8 @@ class app(baseClass):
         
     
     
-    def new_data(self,args):
-        dispatcher = args[0]
+    
+    def virtual_new_data(self, dispatcher, pipe, command, payload):    
         table = dispatcher.command_table()
         self._command_table[table.IDLE] = self._idle_data
         self._command_table[table.HANDLE_MAIN_SCREEN] = self._new_main_screen
@@ -170,14 +168,8 @@ class app(baseClass):
         self._command_table[table.HANDLE_PROGRAM_MANUAL] = self._new_program
         self._command_table[table.HANDLE_HOME_TEMPERATURE] = self._new_home_temperature
 #        logging.getLogger("root").setLevel(logging.INFO)
-        self._command_handler(args)
-                     
-    def cosi(self,args):
-        pass
-    
-    def err(self,args):
-        print args
-        
+        self._command_handler(dispatcher, pipe, command, payload)
+                             
         
     def _prepare_heating_screen_week_p1(self,table):
         return self._prepare_heating_screen(table, False)

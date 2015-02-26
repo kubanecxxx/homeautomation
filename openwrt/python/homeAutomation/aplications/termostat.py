@@ -29,11 +29,6 @@ def log_temperature(base,pipe,load,table):
 class app(baseClass):
     def __init__(self,name):
         baseClass.__init__(self,name)
-        
-        #individual basic setup
-        self.vmt[Hardware.NEW_DATA] = self.new_data
-        self.vmt[Hardware.TX_FINISHED] = self.cosi
-        self.vmt[Hardware.TX_FAILED] = self.err
     
         ## @brief asociated wireless module has logical address 1
         self._pipe_list = [1]
@@ -56,7 +51,7 @@ class app(baseClass):
         #send(table.PIPE_KOTEL,table.MCU_RESET)
         #print_pts("idle from pipe %d" % pipe)
         
-        if (self._idle_count > 2):
+        if (self._idle_count > 5):
             con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek")
             cur = con.cursor()
             cur.execute("select sp_topit()");
@@ -126,39 +121,18 @@ class app(baseClass):
             
         
     ##
-    # @serial
+    # @base_virtual
     #
     # @brief new wireless data received 
     # prepare @ref baseClass._command_table and call @ref baseClass._command_handler
-    def new_data(self,args):
-        dispatcher = args[0]
+    def virtual_new_data(self, dispatcher, pipe, command, payload):
         table = dispatcher.command_table()
         self._command_table[table.IDLE] = self._idle_data
         self._command_table[table.KOTEL_CERPADLO] = self._new_cerpadlo
         self._command_table[table.KOTEL_TEMPERATURE] = self._new_temperature
 #        logging.getLogger("root").setLevel(logging.INFO)
 
-        self._command_handler(args)
+        self._command_handler(dispatcher,pipe,command,payload)
         
-    ##
-    # @serial
-    #
-    # @brief transmition success
-    # do nothing
-    def cosi(self,args):
-        self._log.info("message succesfully sent" + str(args))
-        
-        pass
-    
-    ##
-    # @serial
-    #
-    # @brief transmition error
-    # do nothing
-    def err(self,args):
-        self._log.info("transmitting failed " + str(args))
-        print args
-        
-
 
 ## @}
