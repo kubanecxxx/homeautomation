@@ -12,6 +12,7 @@ import library.TimerReset
 import MySQLdb as mdb
 import fcntl
 import datetime
+import config 
 
 ##
 # @brief debugging function to print data to another terminal
@@ -46,10 +47,12 @@ def print_pts(text):
 # @todo transfer temperature to events
 # @deprecated use @ref baseClass method instead
 def log_to_db(base,pipe,value,table,parameter,db_table, tolerance = False):
-    #writes data to database if value is different from last sample 
+    ## @type base: aplications.baseClass.baseClass
+    ## @type pipe: int
+    #writes data to database if value is different from the previous sample 
     
     idd = table.stations_db_ids[pipe]
-    con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek") 
+    con = base.database_connect()
     cur = con.cursor()
     query = "select cas,%s from %s where cas=(select max(cas) from %s where sensor=%d)" \
     % (parameter,db_table,db_table,idd)
@@ -123,6 +126,16 @@ class baseClass:
         self._log.handlers = []
         self._log.setLevel(logging.NOTSET)
 
+        cd = config.config_dict
+        ## @brief database remote address read from config file
+        self.db_host = cd["db_host"]
+        ## @brief database user name read from config file
+        self.db_user = cd["db_name"]
+        ## @brief database user password read from config file
+        self.db_pass = cd["db_password"]
+        ## @brief database name to be used read from config file
+        self.db_database = cd["db_database"]
+
     ## 
     # @defgroup Virtual_methods
     # @brief virtual methods set is overriden by subclasses of baseClass. It is API for
@@ -186,18 +199,27 @@ class baseClass:
         pass
     
     ## @}
+    
+    ##
+    # @brief helper function connect to the database and return opened 
+    # database connection
+    # @return database connection
+    def database_connect(self):
+        con = mdb.connect(self.db_host,self.db_user,self.db_pass,self.db_database) 
+        return con
 
     ## 
     # @sa @ref log_to_db
-    def _log_event_to_db(self,pipe,table,event_value,event_id,tolerance = False):
+    def _log_event_to_db(self,pipe,table,event_value,event_id, database_table = "events" , tolerance = False):
         #writes data to database if value is different from last sample 
         idd = table.stations_db_ids[pipe]
-        con = mdb.connect(table.db_address,table.db_name,table.db_pass,"pisek") 
+        con = self.database_connect()
+        assert isinstance(con, mdb.connection)
         cur = con.cursor()
-        query = "select cas,event from events where event_id = %d and pipe = %d order by cas desc limit 1" % (event_id, idd)         
+        query = "select cas,event from %s where event_id = %d and pipe = %d order by cas desc limit 1" % (database_table, event_id, idd)         
         cur.execute(query)
     
-        q = "insert into events(pipe,event,event_id) values(%d,%s,%d)" % (idd,event_value,event_id)
+        q = "insert into %s(pipe,event,event_id) values(%d,%s,%d)" % (database_table,idd,event_value,event_id)
         query = None
         a = cur.fetchone()
         now = datetime.datetime.now()
@@ -228,7 +250,6 @@ class baseClass:
     #
     # if situation changes event will be logged into database by pipe number
     # with event code 300
-    # @todo event codes into command_table
     def _check_response(self,pipe,table):    
         #self._timer.reset(5)
         if self._timer:
@@ -242,7 +263,7 @@ class baseClass:
         self._lock.release()
         
         #event is internally logged after two hours if there is no change
-        self._log_event_to_db(pipe, table, True, 300)
+        self._log_event_to_db(pipe, table, True, table.event_id.SLAVE_ALIVE)
         #log_to_db(self, pipe, True, table,"zije","alive")
         if not ar:
             self._log.warning("Slave is alive now")
@@ -257,7 +278,7 @@ class baseClass:
         self._lock.release()
         self._log.warning("Slave has not responded for 10 seconds")
         #log_to_db(self, pipe, False, table,"zije","alive")
-        self._log_event_to_db(pipe, table, False, 300)
+        self._log_event_to_db(pipe, table, False, table.event_id.SLAVE_ALIVE)
         pass
     
     ##

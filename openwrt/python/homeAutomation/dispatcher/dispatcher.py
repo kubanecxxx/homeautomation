@@ -24,6 +24,8 @@ import logging
 import array
 import events
 import inspect, os
+import config
+import collections
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/.." # script directory
 
 
@@ -63,9 +65,8 @@ class dispatcher:
     
     ##
     # @brief open hardware and start dedicated thread
-    # @todo serial port into config file
     def start(self):
-        self._hw.open("/dev/ttyUSB1")
+        self._hw.open(config.config_dict["usb"])
         self._thread.start()
         pass
     

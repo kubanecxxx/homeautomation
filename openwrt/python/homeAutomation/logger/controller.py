@@ -10,12 +10,9 @@ import threading
 import time
 import errno
 import logging.handlers
+import config
 
 class loggerSetup:
-    TCP_PORT = 5555
-    TCP_HOST = ""
-    TCP_ADDR = (TCP_HOST,TCP_PORT)
-    
     def __init__(self):
         self._tcp = None
         self._thread = None
@@ -31,6 +28,9 @@ class loggerSetup:
         pass
     
     def tcp_init(self):
+        TCP_PORT = config.config_dict["logging_control_port"]
+        TCP_HOST = ""
+        self.TCP_ADDR = (TCP_HOST,TCP_PORT)
         self._tcp = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._tcp.bind(self.TCP_ADDR)
         self._tcp.listen(5)

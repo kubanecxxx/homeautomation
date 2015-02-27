@@ -13,6 +13,7 @@ import pickle
 import time
 import logging
 from threading import Timer
+import config
 
 ##
 # @defgroup serial_commands
@@ -153,11 +154,10 @@ class Hardware:
     ##
     # @brief open serial port 
     # @param path_serial full path to the comport (e.g. /dev/ttyS0)
-    # @todo baudrate from configfile
     def open(self, path_serial):
-        self._log.info("opening com port...")
+        self._log.info("opening com port... %s", path_serial)
         self._com = path_serial
-        self._serial = serial.Serial(path_serial, 9600, timeout=None)
+        self._serial = serial.Serial(path_serial, config.config_dict["baudrate"] , timeout=None)
         self.enable_new_data_output(1)
         self.flush_tx()
         self._log.info("comport openened")
@@ -222,7 +222,6 @@ class Hardware:
     # encode packet serial data; adds preamble and crc
     # @param command [@ref serial_commands ]
     # @param payload [array.array("c")] arbitrary data 
-    # @todo document serial frame
     def _put_command_packet(self, command, payload=None):
         # @type payload: array.array
         # generate crc

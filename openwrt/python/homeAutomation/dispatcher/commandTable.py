@@ -68,54 +68,30 @@ class commands:
     PIPE_HODINY = 2
     
 
+    ## 
+    # @brief station ids dictionary by the database table
     stations_db_ids = {}
     stations_db_ids[PIPE_KOTEL] = 201
     stations_db_ids[PIPE_OVLADAC] = 200
     stations_db_ids[PIPE_HODINY] = 202
     
-    
+    ##    
+    # @brief station names dictionary by the database table
     stations = {}
     stations[PIPE_KOTEL] = "kotel"
     stations[PIPE_OVLADAC] = "ovladac"
     stations[PIPE_HODINY] = "hodiny"
     
-    #database connection section
-    db_address = ""
-    db_name = ""
-    db_pass = ""
-    
-    db_address_list = {}
-    db_name_list = {}
-    db_pass_list = {}
-
-    wrt = 'OpenWrt'
-    pc = 'kubanec-linux'
-    ntbk = 'kubanec-laptop'
-    db_address_list[ntbk] = "localhost"
-    db_address_list[wrt] = "localhost"
-    db_address_list[pc] = "192.168.1.1"
-    db_name_list[wrt] = "root"
-    db_name_list[pc] = "kubanec"
-    db_name_list[ntbk] = "kubanec"
-    db_pass_list[wrt] = "heslo"
-    db_pass_list[pc] = "kokot"
-    db_pass_list[ntbk] = "kokot"
-    
     ##
-    # @brief According to the hostname select database credentials
-    #
-    # used mainly for testing reasons - main development was on PC and
-    # the application used to connect directly to the database from the PC.
-    # Then it runs directly on openwrt router which also contains the MySQL database
-    # 
-    # @warning these values must be set according to your database parameters 
-    # @todo use configuration file
-    def __init__(self):
-        name = socket.gethostname()
-        self.db_address = self.db_address_list[name]
-        self.db_name = self.db_name_list[name]
-        self.db_pass = self.db_pass_list[name]
-
+    # @brief database events id enum
+    class event_id():
+        SLAVE_ALIVE = 300
+        HEATING_ENABLED = 301
+        WATER_PUMP_ENABLED = 302
+        HEATING_LATCH = 303
+        WARM_WATER_TEMPERATURE = 304
+        HOME_TEMPERATURE = 305
+        pass
 
 #@}
 #@}

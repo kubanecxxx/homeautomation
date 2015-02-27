@@ -1,7 +1,4 @@
 
-__author__ = 'kubanec'
-
-
 import sys
 from hardware import serialHardware
 from events import events
@@ -10,13 +7,31 @@ import logging.handlers
 from dispatcher import dispatcher
 import time
 import logger.controller
+import config
+
+parameter_list = ["pid-file"]
+input_pars = {}
+
+## default parameters
+input_pars["pid-file"] = "/var/run/homeAutomation.pid"
+
+for a in sys.argv:
+    for p in parameter_list:
+        t = ("--" + p + "=")
+        if t in a:
+            a = a.replace(t,"")
+            input_pars[p] = a
+
 
 #singleton
 import fcntl
 import os
 #pid_file = '/var/run/homeAutomation.pid'
-pid_file = '/tmp/homeautom.pid'
-fp = open(pid_file, 'w')
+pid_file = input_pars["pid-file"]
+try:
+    fp = open(pid_file, "rw")
+except:
+    fp = open(pid_file,"w")
 try:
     fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
     fp.write(str(os.getpid()))
@@ -49,6 +64,8 @@ stderr = logging.StreamHandler(sys.stderr)
 stderr.setLevel(logging.WARN)
 
 print "How are you doing everybody let's start "
+
+c = config.application_config("config.cfg")
 
 a = logging.getLogger("root")
 a.addHandler(stderr)

@@ -22,7 +22,7 @@ class app(baseClass):
     ## 
     # @base_virtual
     def virtual_new_data(self, dispatcher, pipe, command, payload):
-        print pipe,command,payload
+        pass
 
    
     ## 
