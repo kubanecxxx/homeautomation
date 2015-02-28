@@ -31,8 +31,24 @@ class termostat_model extends CI_Model
 
     function getTemperatures()
     {
-        $q = $this->db->query("select temperatures.sensor,value value, cas from temperatures inner join (select temperatures.sensor, max(cas) as ts from temperatures group by temperatures.sensor) maxt on (maxt.sensor=temperatures.sensor and maxt.ts = temperatures.cas  ) order by sensor ");
-        // q = $this->db->query("call sp_lastTemperatures()");
+//        $q = $this->db->query("select temperatures.sensor,value value, cas from temperatures inner join (select temperatures.sensor, max(cas) as ts from temperatures group by temperatures.sensor) maxt on (maxt.sensor=temperatures.sensor and maxt.ts = temperatures.cas  ) order by sensor ");
+        /*
+        $q = $this->db->query("select events.sensor,value value, cas from temperatures \
+            inner join (select temperatures.sensor, max(cas) as ts from temperatures group by \
+            temperatures.sensor) maxt on (maxt.sensor=temperatures.sensor and maxt.ts = temperatures.cas  ) \
+            order by sensor ");
+            
+           */
+        $query = "select event from events where event_id = 304 order by cas desc limit 1";
+        $water = $this->db->query($query)->result();
+        $query = "select event from events where event_id = 305 order by cas desc limit 1";
+        $home = $this->db->query($query)->result();
+        
+        $water =  $water[0]->event;
+        $home = $home[0]->event;
+        
+        $q = (object) array ("home" => $home, "water" => $water) ;
+        //$q = $this->db->query("call sp_lastTemperatures()");
         return $q;
     }
 

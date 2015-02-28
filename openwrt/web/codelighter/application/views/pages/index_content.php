@@ -69,7 +69,7 @@ function showing(){
 
 
 
-<?php $arr = $teploty->result(); ?>
+<?php $arr = $teploty; ?>
 
 
 <table>
@@ -121,10 +121,10 @@ echo form_close();
 	<tr>
 		<td>
  
- <?php echo $this->termometer->getImg($arr[0]->value,False,15,1, "id=nevim"); ?>
+ <?php echo $this->termometer->getImg($arr->home,False,15,1, "id=nevim"); ?>
     </td>
 		<td>
-<?php echo $this->termometer->getImg($arr[1]->value,True,25,2, "id=nevim "); ?>
+<?php echo $this->termometer->getImg($arr->water,True,25,2, "id=nevim "); ?>
 </td>
 
 	</tr>
