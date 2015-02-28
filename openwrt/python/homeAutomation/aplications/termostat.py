@@ -12,19 +12,7 @@ import time
 import MySQLdb as mdb
 from dispatcher import commandTable
 
-##
-# @brief helper function to log temperature recieved from wireless slave module
-# to database
-def log_temperature(base,pipe,load,table):
-    ## @type base: baseClass.baseClass
-    if (len(load) != 2):
-        return
 
-    teplota = base.getInt(load) / 2.0
-    base._log.debug(log_to_db(base,pipe,teplota,table,"value","temperatures",True))
-    base._log.debug(teplota)
-        
-    
 ##
 # @brief termostat module class
 class app(baseClass):
@@ -54,7 +42,7 @@ class app(baseClass):
             con.close()
             topit = topit[0]
             self._log.info("topit %d" % topit)
-            #send(table.PIPE_KOTEL,table.KOTEL_TOPIT,topit,1)
+            send(table.PIPE_KOTEL,table.KOTEL_TOPIT,topit,1)
             self._idle_count = 0
         
         self._idle_count += 1
@@ -70,11 +58,14 @@ class app(baseClass):
     def _new_temperature(self,send,table,pipe,command,load):
         ## need backup of load because is changed in this function
         b = load[:]
-        (log_temperature(self,pipe, load, table))
-        
+
         if len(b) == 2:
             t = self.getInt(b)/2.0
-            self._log_event_to_db(pipe,table,t,table.event_id.WARM_WATER_TEMPERATURE, tolerance=True)
+            if (t < 100):
+                self._log.info("new water temperature received %f", t)
+                self._log_event_to_db(pipe,table,t,table.event_id.WARM_WATER_TEMPERATURE, tolerance=True)
+            else:
+                self._log.warning("water temerature greater then 100 (%f)",t)
         pass
    
     ## 

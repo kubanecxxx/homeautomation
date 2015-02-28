@@ -1,4 +1,4 @@
--- MySQL dump 10.15  Distrib 10.0.13-MariaDB, for Linux (x86_64)
+-- MySQL dump 10.15  Distrib 10.0.16-MariaDB, for Linux (x86_64)
 --
 -- Host: 192.168.1.1    Database: pisek
 -- ------------------------------------------------------
@@ -80,22 +80,6 @@ CREATE TABLE `programy_names` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `temperatures`
---
-
-DROP TABLE IF EXISTS `temperatures`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `temperatures` (
-  `cas` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `value` float NOT NULL,
-  `sensor` int(11) NOT NULL,
-  PRIMARY KEY (`cas`,`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Dumping events for database 'pisek'
 --
 /*!50106 SET @save_time_zone= @@TIME_ZONE */ ;
@@ -111,7 +95,7 @@ DELIMITER ;;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES' */ ;;
 /*!50003 SET @saved_time_zone      = @@time_zone */ ;;
 /*!50003 SET time_zone             = 'SYSTEM' */ ;;
-/*!50106 CREATE EVENT `prestan_topit` ON SCHEDULE AT '2014-09-21 17:44:50' ON COMPLETION PRESERVE DISABLE DO update program as p1 join program as p2 on (p1.id_count = 100 and p2.id_count = 101) set p1.id = p2.id, p2.id = p1.id */ ;;
+/*!50106 CREATE EVENT `prestan_topit` ON SCHEDULE AT '2015-02-28 11:26:29' ON COMPLETION PRESERVE DISABLE DO update program as p1 join program as p2 on (p1.id_count = 100 and p2.id_count = 101) set p1.id = p2.id, p2.id = p1.id */ ;;
 /*!50003 SET time_zone             = @saved_time_zone */ ;;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;;
@@ -177,7 +161,7 @@ CREATE DEFINER=`kubanec`@`192.168.1.148` FUNCTION `sp_requestedTemperature`() RE
 begin
 	declare idd int;
 	declare cant float;
-	select id into idd from program where id_count = 100;
+	select sp_program() into idd;
 	select teplota into cant from programy where 
 	if (start < stop , curtime() > start and curtime() < stop  ,
 	curtime() > start and time_to_sec(curtime()) < time_to_sec(stop) + 86400)	
@@ -209,7 +193,37 @@ begin
 	select sp_requestedTemperature() into ja;
 	select sp_program() into p;
 	select sensor into pipe from programy where id = p limit 1;
-	select value into t from temperatures where sensor = pipe order by cas desc limit 1;
+	select event into t from events where event_id = pipe order by cas desc limit 1;
+	
+	if (ja > t) then return true; end if;
+	return false;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP FUNCTION IF EXISTS `sp_topit2` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES' */ ;
+DELIMITER ;;
+CREATE DEFINER=`kubanec`@`192.168.1.148` FUNCTION `sp_topit2`() RETURNS tinyint(1)
+begin
+	declare ja float;
+	declare t float;
+	declare p int;
+	declare pipe int;
+	
+	select sp_requestedTemperature() into ja;
+	select sp_program() into p;
+	select sensor into pipe from programy where id = p limit 1;
+	select event into t from events where event_id = pipe order by cas desc limit 1;
 	
 	if (ja > t) then return true; end if;
 	return false;
@@ -303,13 +317,13 @@ CREATE DEFINER=`kubanec`@`192.168.1.148` PROCEDURE `sp_lastTemperatures`()
 begin
 	declare i int;
 	declare t float;
-	set i = 200;
+	set i = 304;
 
 	create  temporary table temp_table (pipe int, temperature float);
 	
-	while i < 206 do
+	while i < 306 do
 		set t = NULL;
-		select value into t from temperatures  where sensor = i order by cas desc limit 1;
+		select event into t from events  where event_id = i order by cas desc limit 1;
 		if t is not NULL then
 			insert into temp_table(pipe,temperature) values(i,t);
 		end if;
@@ -365,4 +379,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-09-22 19:06:00
+-- Dump completed on 2015-02-28 13:53:01
