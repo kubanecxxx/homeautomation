@@ -201,7 +201,7 @@ void cb_programSwitcher(piris::PKeyEvent * evt, piris::PSpecialSpinBox * spin)
 		return;
 	}
 
-	if (!spin->toggled() || evt->key == kENTER)
+	if ((!spin->toggled() && !evt->key == (kUP | kDOWN)) || evt->key == kENTER)
 		return;
 
 	//deaktivovat pokud aktivováno

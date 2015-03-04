@@ -45,7 +45,7 @@ void dataModel::mainScreenCb(packetHandling * ph, nrf_commands_t,
 		((dataModel *) t)->screens_ready |= MODEL_READY_MAIN;
 		piris::PKeyEvent evt;
 		evt.event = piris::RELEASED;
-		evt.key = kUP;
+		evt.key = kUP | kDOWN;
 
 		gui::main_program = data->program;
 		gui::ManualTemp = data->manualTemperature * 5;
@@ -63,45 +63,37 @@ void dataModel::sendProgramManual()
 {
 	if (screens_ready & MODEL_READY_MAIN)
 	{
-		int16_t p[2];
+		int8_t p[2];
 		p[0] = gui::ManualTemp / 5;
 		p[1] = gui::main_program;
 
-		ph.WriteData(HANDLE_PROGRAM_MANUAL, p, 4);
+		ph.WriteData(HANDLE_PROGRAM_MANUAL, p, 2);
 	}
 }
 
 void dataModel::waterScreenCb(packetHandling * ph, nrf_commands_t,
 		void * rawdata, uint8_t size, void * t)
 {
-	if (size != 16 && size != 2)
+	if (size != sizeof(dataModel_waterScreen_t))
 	{
 		ph->WriteData(DATA_ERROR, 1, 1);
 		return;
 	}
 
-	if (size == 2)
-	{
-		if (processedByUser)
-			return;
-		gui::voda_temperature = *((int16_t*) rawdata) * 5;
-		((dataModel *) t)->screens_ready |= MODEL_READY_WATER_TEMP;
-		return;
-	}
-
-	dataModel_waterScreenRow_t * data = (dataModel_waterScreenRow_t *) rawdata;
+	dataModel_waterScreen_t * data = (dataModel_waterScreen_t *) rawdata;
 
 	if (!processedByUser)
 	{
 		((dataModel *) t)->screens_ready |= MODEL_READY_WATER;
 		for (int i = 0; i < 2; i++)
 		{
-			*gui::water[2 * i].hours = data->hoursStart;
-			*gui::water[2 * i].minutes = data->minutesStart;
-			*gui::water[2 * i + 1].hours = data->hoursStop;
-			*gui::water[2 * i + 1].minutes = data->minutesStop;
-			data++;
+			*gui::water[2 * i].hours = data->time[i].hoursStart;
+			*gui::water[2 * i].minutes = data->time[i].minutesStart;
+			*gui::water[2 * i + 1].hours = data->time[i].hoursStop;
+			*gui::water[2 * i + 1].minutes = data->time[i].minutesStop;
 		}
+
+		gui::voda_temperature = data->temperature * 5;
 	}
 }
 
@@ -111,15 +103,9 @@ void dataModel::heatingScreenCb(packetHandling * ph, nrf_commands_t,
 	const gui::heating_row_t * row = NULL;
 	dataModel_heatingScreenRow_t * data =
 			(dataModel_heatingScreenRow_t*) rawdata;
-	if (size == sizeof(dataModel_heatingScreenRow_t) * 3)
+	if (size == sizeof(dataModel_heatingScreenRow_t) * 4)
 	{
 		row = gui::heating_week;
-		if (!processedByUser)
-			((dataModel *) t)->screens_ready |= MODEL_READY_HEATING_WEEK_P2;
-	}
-	else if (size == sizeof(dataModel_heatingScreenRow_t))
-	{
-		row = &gui::heating_week[3];
 		if (!processedByUser)
 			((dataModel *) t)->screens_ready |= MODEL_READY_HEATING_WEEK;
 	}
@@ -172,14 +158,13 @@ void dataModel::sendWaterScreen()
 
 	for (int i = 0; i < 2; i++)
 	{
-		data[i].hoursStart = *gui::water[2 * i].hours;
-		data[i].minutesStart = *gui::water[2 * i].minutes;
-		data[i].hoursStop = *gui::water[2 * i + 1].hours;
-		data[i].minutesStop = *gui::water[2 * i + 1].minutes;
+		data.time[i].hoursStart = *gui::water[2 * i].hours;
+		data.time[i].minutesStart = *gui::water[2 * i].minutes;
+		data.time[i].hoursStop = *gui::water[2 * i + 1].hours;
+		data.time[i].minutesStop = *gui::water[2 * i + 1].minutes;
 	}
-	data[2].hoursStart = gui::voda_temperature / 5;
-	if (screens_ready & MODEL_READY_WATER
-			&& screens_ready & MODEL_READY_WATER_TEMP)
+	data.temperature = gui::voda_temperature / 5;
+	if (screens_ready & MODEL_READY_WATER)
 		ph.WriteData(HANDLE_WATER_SCREEN, &data, 18);
 }
 

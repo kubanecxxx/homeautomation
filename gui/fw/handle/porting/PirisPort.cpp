@@ -11,9 +11,14 @@
 #include "ptypes.h"
 #include "PwmBacklight.h"
 #include "dataModel.h"
+#include "pscreen.h"
 
 bool processedByUser;
 extern dataModel model;
+namespace gui
+{
+extern piris::PScreen main_screen;
+}
 
 extern "C" void __cxa_pure_virtual()
 {
@@ -24,29 +29,30 @@ extern "C" void __cxa_pure_virtual()
 
 void * operator new(size_t size)
 {
-	chDbgPanic("we don't want dynamic allocation");
+	chDbgPanic("we don't want any dynamic allocation");
 	return NULL;
 }
 
 void PirisPort::timeout(arg_t data)
 {
 	static bool uz = false;
-	PirisPort * o = (PirisPort*)data;
+	PirisPort * o = (PirisPort*) data;
 	if (uz)
 		model.sendProgramManual();
 
 	uz = true;
 	processedByUser = false;
 	PwmBacklight::FadeOut();
+	if (!gui::main_screen.isActive())
+		gui::main_screen.makeActive();
 }
 
 void PirisPort::start()
 {
 	St7735::Init();
-	backlight.Setup(timeout,this,MS2ST(5000),ONCE);
+	backlight.Setup(timeout, this, MS2ST(10000), ONCE);
 	backlight.Register();
 }
-
 
 bool PirisPort::readKeyEvent(piris::PKeyEvent * evt)
 {
@@ -55,7 +61,7 @@ bool PirisPort::readKeyEvent(piris::PKeyEvent * evt)
 
 	uint16_t state;
 	state = palReadPad(BUTTON_DOWN_PORT, BUTTON_DOWN_PIN) << 1;
-	state |= palReadPad(BUTTON_UP_PORT, BUTTON_UP_PIN) ;
+	state |= palReadPad(BUTTON_UP_PORT, BUTTON_UP_PIN);
 	state |= palReadPad(BUTTON_ENTER_PORT, BUTTON_ENTER_PIN) << 2;
 
 	if (state != last_state)
@@ -72,7 +78,6 @@ bool PirisPort::readKeyEvent(piris::PKeyEvent * evt)
 		backlight.Register();
 
 		processedByUser = true;
-
 
 		return true;
 

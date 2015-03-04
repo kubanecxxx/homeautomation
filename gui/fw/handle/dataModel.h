@@ -11,41 +11,45 @@
 
 typedef  struct __attribute__((__packed__))
 {
-	int16_t hours;
-	int16_t minutes;
-	int16_t dayOfWeek;
-	int16_t program;
-	int16_t heatingTemperature;
-	int16_t manualTemperature;
-	int16_t homeTemperature;
-	int16_t waterTemperature;
-	int16_t slaveConnectionStatus;
-	int16_t heatingActive;
+	int8_t hours;
+	int8_t minutes;
+	int8_t dayOfWeek;
+	int8_t program;
+	int8_t heatingTemperature;
+	int8_t manualTemperature;
+	int8_t homeTemperature;
+	int8_t waterTemperature;
+	int8_t slaveConnectionStatus;
+	int8_t heatingActive;
 } dataModel_mainScreen_t ;
 
 typedef struct __attribute__((__packed__))
 {
-	int16_t hours;
-	int16_t minutes;
-	int16_t temperature;
+	int8_t hours;
+	int8_t minutes;
+	int8_t temperature;
 } dataModel_heatingScreenRow_t ;
 
 typedef struct __attribute__((__packed__))
 {
-	int16_t hoursStart;
-	int16_t hoursStop;
-	int16_t minutesStart;
-	int16_t minutesStop;
+	int8_t hoursStart;
+	int8_t minutesStart;
+	int8_t hoursStop;
+	int8_t minutesStop;
 } dataModel_waterScreenRow_t ;
-typedef dataModel_waterScreenRow_t dataModel_waterScreen_t[3];
+
+typedef struct __attribute__ ((__packed__))
+{
+	dataModel_waterScreenRow_t time[2];
+	int8_t temperature;
+}
+dataModel_waterScreen_t;
 
 #define MODEL_READY_MAIN 1
 #define MODEL_READY_HEATING_WEEK 2
 #define MODEL_READY_HEATING_WEEKEND 4
 #define MODEL_READY_WATER 8
-#define MODEL_READY_HEATING_WEEK_P2 16
-#define MODEL_READY_WATER_TEMP 32
-#define MODEL_READY_MASK (0x3f)
+#define MODEL_READY_MASK (0x0f)
 
 class packetHandling;
 class dataModel

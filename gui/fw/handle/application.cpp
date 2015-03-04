@@ -53,21 +53,20 @@ void connection_state(bool ok)
 void getData_cb(arg_t)
 {
 	static uint8_t ja = 0;
-	if (chTimeNow() < S2ST(180))
+	if (chTimeNow() < S2ST(5))
 	{
-		gui::main_countdown =  chTimeNow() / CH_FREQUENCY;
+//		gui::main_countdown = chTimeNow() / CH_FREQUENCY;
 		return;
 	}
 
-
-	if (ja++ > 30)
+	if (ja++ > 300)
 	{
 
 		ja = 0;
 		model.setScreenDirty(MODEL_READY_MASK);
 	}
 
-	gui::main_countdown = (30 - ja) * 10;
+//	gui::main_countdown = (30 - ja) * 10;
 
 	uint8_t ready = model.screensReady();
 
@@ -77,10 +76,9 @@ void getData_cb(arg_t)
 	if (!(ready & MODEL_READY_HEATING_WEEKEND))
 		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_HEATING_SCREEN_WEEKEND,
 				1);
-	else if (!(ready & MODEL_READY_HEATING_WEEK)
-			|| !(ready & MODEL_READY_HEATING_WEEK_P2))
+	else if (!(ready & MODEL_READY_HEATING_WEEK))
 		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_HEATING_SCREEN_WEEK, 1);
-	else if (!(ready & MODEL_READY_WATER) || !(ready & MODEL_READY_WATER_TEMP))
+	else if (!(ready & MODEL_READY_WATER))
 		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_WATER_SCREEN, 1);
 	else if (!(ready & MODEL_READY_MAIN))
 		ph.WriteData(HANDLE_GET_SCREENS, HANDLE_RELOAD_MAIN_SCREEN, 1);

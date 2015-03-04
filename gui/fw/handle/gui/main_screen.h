@@ -64,9 +64,9 @@ const DECL_SPECIALSPINBOX_PROPERTIES(main_menu, 0,6,1, cb, NULL,0, NULL,0,"",NUL
 piris::PSpecialSpinBox main_menu(main_menu_sp,main_menu_p,&main_screen);
 
 //countdown
-const DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_countdown,MARGIN+50,10,"",0x020202,piris::INVALID,&font8,font8_p);
-const DECL_SPECIALSPINBOX_PROPERTIES(main_countdown, 0,20000,1, NULL, NULL,0, NULL,0,"%d",NULL);
-DECL_SPECIAL_SPINBOX(main_countdown,&main_screen);
+//const DECL_SPECIALSPINBOXWIDGET_PROPERTIES_DISABLED(main_countdown,MARGIN+50,10,"",0x020202,piris::INVALID,&font8,font8_p);
+//const DECL_SPECIALSPINBOX_PROPERTIES(main_countdown, 0,20000,1, NULL, NULL,0, NULL,0,"%d",NULL);
+//DECL_SPECIAL_SPINBOX(main_countdown,&main_screen);
 
 //topim/netopim
 const char * topi_table[2] =
