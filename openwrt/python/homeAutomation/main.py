@@ -8,6 +8,9 @@ from dispatcher import dispatcher
 import time
 import logger.controller
 import config
+import os
+import single_instance
+
 
 parameter_list = ["pid-file"]
 input_pars = {}
@@ -23,35 +26,21 @@ for a in sys.argv:
             input_pars[p] = a
 
 
-#singleton
-import fcntl
-import os
-#pid_file = '/var/run/homeAutomation.pid'
 pid_file = input_pars["pid-file"]
-try:
-    fp = open(pid_file, "rw")
-except:
-    fp = open(pid_file,"w")
-try:
-    fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    fp.write(str(os.getpid()))
-    fp.write("\n\r")
-    fp.flush()
-except IOError:
-    print "another instance is running"    
-    sys.exit(1)
 
+## check if another instance of app is running
+single_instance.check_single_instance(pid_file)
 
 # setup logging facility
 FORMAT = '%(asctime)s  [%(name)s]:[%(levelname)s] - %(message)s'
 #logging.basicConfig(format=FORMAT)
 formater= logging.Formatter(FORMAT)
 
-import inspect, os
+import inspect 
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) # script directory
 
-fh = logging.handlers.RotatingFileHandler(path + "/log.txt",maxBytes=(1024*1024*5),backupCount=7)
-fh_error = logging.handlers.RotatingFileHandler(path + "/errors.txt",maxBytes=(1024*1024*5),backupCount=7)
+fh = logging.handlers.RotatingFileHandler(path + "/log.txt",maxBytes=(1024*1024*1),backupCount=7)
+fh_error = logging.handlers.RotatingFileHandler(path + "/errors.txt",maxBytes=(1024*1024*1),backupCount=7)
 fh.setFormatter(formater)
 fh.setLevel(logging.WARN)
 fh_error.setFormatter(formater)
