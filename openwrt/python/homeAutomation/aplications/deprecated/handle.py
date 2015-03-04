@@ -18,7 +18,6 @@ import logging.handlers
 import Queue
 import library.stoppableThread
 import datetime
-from aplications.termostat import log_temperature
 
 def getList(arr):
     list = []

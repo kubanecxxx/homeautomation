@@ -11,11 +11,12 @@ import array
 
 ##
 # @brief basic user module class used only for testing
+# @note can be used as a template for new module
 class app(baseClass):
     def __init__(self,name):
         baseClass.__init__(self,name,False)
         
-        self._pipe_list = [0]
+        self._pipe_list = [10]
         print "startup"
         pass
    
