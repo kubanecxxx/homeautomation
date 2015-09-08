@@ -35,7 +35,9 @@ class tcpShell:
         self._var.clear()        
         for c in self._connections:
             c.clean()
-        self._thread.join()
+        
+        if self._thread.isAlive():
+            self._thread.join()
         
     def start(self):
         TCP_PORT = self._port
