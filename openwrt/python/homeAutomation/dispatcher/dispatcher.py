@@ -25,6 +25,7 @@ import array
 import events
 import inspect, os
 import config
+import threading
 import collections
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + "/.." # script directory
 
@@ -52,7 +53,7 @@ class dispatcher:
         self._hw = serialHardware.Hardware(self._handle_events) #hardware connector        
         ## @brief dedicated thread
         self._thread = Thread(target=self._loop,name="dispatcher")
-        self._thread.setDaemon(True)
+        #self._thread.setDaemon(True)
         ## @brief instance logger
         self._log = logging.getLogger("root.dispatcher")
         self._lock = Lock()
@@ -61,6 +62,9 @@ class dispatcher:
         ## @brief command table
         self._command_table = commandTable.commands
         self._log_apps = logging.getLogger("root.apps")
+        
+        self._var = threading.Event()
+        self._var.set()
         pass
     
     ##
@@ -69,6 +73,21 @@ class dispatcher:
         self._hw.open(config.config_dict["usb"])
         self._thread.start()
         pass
+    
+    def close(self):
+        self._log.debug("Closing")
+        self._hw.close()
+        self._var.clear()
+        
+        self._thread.join()
+        self._log.debug("thread closed")
+        
+        self._log.debug("stopping timers")
+        for a in self._objects.values():
+            f = a[0]
+            f.stop_timer()
+        
+
     
     ##
     # @brief format serial data to command and payload
@@ -158,7 +177,7 @@ class dispatcher:
     # @brief  @ref _thread code checks for changes in user modules and @ref command_table
     # and reloads changed modules or table on the fly
     def _loop(self):
-        while True:    
+        while self._var.isSet():    
             try:
                 self._lock.acquire()
                 self._objects = self._get_objects(self._objects)

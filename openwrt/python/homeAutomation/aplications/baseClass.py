@@ -281,6 +281,12 @@ class baseClass:
         self._log_event_to_db(pipe, table, False, table.event_id.SLAVE_ALIVE)
         pass
     
+    def stop_timer(self):
+        self._log.debug("stopping... timer")
+        if self._timer:
+            self._timer.cancel()
+            self._log.debug("stopped timer")
+    
     ##
     # @brief slave state 
     # @return slave status

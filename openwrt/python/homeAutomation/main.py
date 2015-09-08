@@ -6,84 +6,118 @@ import logging
 import logging.handlers
 from dispatcher import dispatcher
 import time
-import logger.controller
 import config
 import os
 import single_instance
+import tcp_shell.tcpShell
+import signal
+import threading
 
+def sigterm(a,b):
+    logging.getLogger("root").info("application terminated by SIGTERM")
+    print "SIGTERM was sent"    
+    tidy_up()
+    pass
 
-parameter_list = ["pid-file"]
-input_pars = {}
+def tidy_up():
+    print "bye"
+    events.event.register_exit(0)    
+    disp.close()
+    shell.clean()
+    print threading.enumerate()
+    sys.exit(0)
 
-## default parameters
-input_pars["pid-file"] = "/var/run/homeAutomation.pid"
+## @brief setup logging facility
+def _setup_logger():
+    # setup logging facility
+    FORMAT = '%(asctime)s  [%(name)s]:[%(levelname)s] - %(message)s'
+    #logging.basicConfig(format=FORMAT)
+    formater= logging.Formatter(FORMAT)
+    
+    import inspect 
+    path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) # script directory
+    
+    fh = logging.handlers.RotatingFileHandler(path + "/log.txt",maxBytes=(1024*1024*1),backupCount=7)
+    fh_error = logging.handlers.RotatingFileHandler(path + "/errors.txt",maxBytes=(1024*1024*1),backupCount=7)
+    fh.setFormatter(formater)
+    fh.setLevel(logging.WARN)
+    fh_error.setFormatter(formater)
+    fh_error.setLevel(logging.ERROR)
+    cout = logging.StreamHandler(sys.stdout)
+    cout.setFormatter(formater)
+    cout.setLevel(logging.DEBUG)
+    
+    stderr = logging.StreamHandler(sys.stderr)
+    stderr.setLevel(logging.WARN)
+    
+    a = logging.getLogger("root")
+    a.addHandler(stderr)
+    a.setLevel(1)
+    
+    logging.getLogger("root").addHandler(cout)
+    
+    #a.addHandler(cout)
+    a.addHandler(fh)
+    a.addHandler(fh_error)
+    
+    return a
+            
+if __name__ == '__main__':
+    signal.signal(signal.SIGTERM,sigterm)
+    signal.signal(signal.SIGINT,sigterm)
+                
+    parameter_list = ["pid-file"]
+    input_pars = {}
+    
+    ## default parameters
+    input_pars["pid-file"] = "/var/run/homeAutomation.pid"
+    
+    for a in sys.argv:
+        for p in parameter_list:
+            t = ("--" + p + "=")
+            if t in a:
+                a = a.replace(t,"")
+                input_pars[p] = a
+    
+    
+    pid_file = input_pars["pid-file"]
+    
+    ## setup logs
+    a = _setup_logger()
+    
+    ## check if another instance of app is running
+    single_instance.check_single_instance(pid_file)
+    
+    print "How are you doing everybody let's start "
+    c = config.application_config("config.cfg")
+    
+    ## setup remote shell
+    shell = tcp_shell.tcpShell.tcpShell(config.config_dict["logging_control_port"],"root")
+    shell.start()
+    
+    a.warn("application started")
+    
+    # start the application 
+    disp = dispatcher.dispatcher()
+    disp.start()
 
-for a in sys.argv:
-    for p in parameter_list:
-        t = ("--" + p + "=")
-        if t in a:
-            a = a.replace(t,"")
-            input_pars[p] = a
+    event_loop = threading.Thread(target=events.event.loop,name="event loop")
+    event_loop.setDaemon(False)
+    event_loop.start()
+    
+    try:
+        while True:
+            l = logging.getLogger("root.threads")
+            time.sleep(1)
+            i = 0
+            for a in threading.enumerate():
+                i += 1
+                l.debug( "%d - %s" % (i,a)) 
+    except KeyboardInterrupt:
+        a.warn("application disabled by CTRL+C")
+        tidy_up()    
 
-
-pid_file = input_pars["pid-file"]
-
-## check if another instance of app is running
-single_instance.check_single_instance(pid_file)
-
-# setup logging facility
-FORMAT = '%(asctime)s  [%(name)s]:[%(levelname)s] - %(message)s'
-#logging.basicConfig(format=FORMAT)
-formater= logging.Formatter(FORMAT)
-
-import inspect 
-path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) # script directory
-
-fh = logging.handlers.RotatingFileHandler(path + "/log.txt",maxBytes=(1024*1024*1),backupCount=7)
-fh_error = logging.handlers.RotatingFileHandler(path + "/errors.txt",maxBytes=(1024*1024*1),backupCount=7)
-fh.setFormatter(formater)
-fh.setLevel(logging.WARN)
-fh_error.setFormatter(formater)
-fh_error.setLevel(logging.ERROR)
-cout = logging.StreamHandler(sys.stdout)
-cout.setFormatter(formater)
-cout.setLevel(logging.DEBUG)
-
-stderr = logging.StreamHandler(sys.stderr)
-stderr.setLevel(logging.WARN)
-
-print "How are you doing everybody let's start "
-
-c = config.application_config("config.cfg")
-
-a = logging.getLogger("root")
-a.addHandler(stderr)
-a.setLevel(logging.DEBUG)
-
-logging.getLogger("root.apps").addHandler(cout)
-
-#a.addHandler(cout)
-a.addHandler(fh)
-a.addHandler(fh_error)
-
-jaja = logger.controller.loggerSetup()
-
-a.warn("application started")
-
-# start the application 
-disp = dispatcher.dispatcher()
-disp.start()
-
-try:
-    events.event.loop()
-except KeyboardInterrupt:
-    a.warn("application disabled by CTRL+C")
-    print "bye bye"
-
-except:
-    a.exception("application crashed")
-
-
+    #th.join()
 ##
 # @mainpage Application classes colaboraiton
 #

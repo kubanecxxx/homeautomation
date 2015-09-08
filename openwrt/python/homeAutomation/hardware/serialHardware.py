@@ -7,6 +7,7 @@ import serial
 from crc8 import crc8
 import array
 from threading import Thread, Lock 
+import threading
 from events import events
 import Queue
 import pickle
@@ -14,6 +15,7 @@ import time
 import logging
 from threading import Timer
 import config
+import errno
 
 ##
 # @defgroup serial_commands
@@ -132,8 +134,9 @@ class Hardware:
         self._crc = crc8()
         ## @brief comport reading thread
         self._thread = Thread(target=self._loop, name="comport")
-        self._thread.setDaemon(True)
-        self._run = True
+        #self._thread.setDaemon(True)
+        self._comportContinue = threading.Event()
+        self._comportContinue.set()
         self._newdata_cb = new_data_cb
         self._ack_packet_finished_cb = ack_packet_finished_cb
         self._client_unreachable = client_unreachable
@@ -142,7 +145,9 @@ class Hardware:
         self._lock = Lock()
         ## @brief wireless transmition packet queue processing thread
         self._send_thread = Thread(target=self._sending_loop2, name="ack payload sender")
-        self._send_thread.setDaemon(True)
+        #self._send_thread.setDaemon(True)
+        self._sendContinue = threading.Event()
+        self._sendContinue.set()
         self._send_queue = Queue.Queue()
         self._packet_inside = False        
         self._buffer = []
@@ -157,7 +162,7 @@ class Hardware:
     def open(self, path_serial):
         self._log.info("opening com port... %s", path_serial)
         self._com = path_serial
-        self._serial = serial.Serial(path_serial, config.config_dict["baudrate"] , timeout=None)
+        self._serial = serial.Serial(path_serial, config.config_dict["baudrate"] , timeout=0)
         self.enable_new_data_output(1)
         self.flush_tx()
         self._log.info("comport openened")
@@ -171,7 +176,15 @@ class Hardware:
     ##
     # @brief close comport and terminate threads
     def close(self):
-        self._run = False
+        self._log.debug("Close called")
+        self._sendContinue.clear()     
+        self._comportContinue.clear()
+        
+        self._thread.join()
+        self._log.debug("listening thread finished after join")   
+        self._send_thread.join()
+        self._log.debug("sending thread finished after join")
+        
         self._serial.close()
         pass
 
@@ -256,6 +269,7 @@ class Hardware:
         try:
             self.__loop()
         except:
+            self._log.exception("listening thread failed")
             events.event.register_exit()
         
     ##
@@ -289,12 +303,20 @@ class Hardware:
         payload = array.array("c")
         self._loop_idx = 0
         crc = 0
+        self._log.debug("listening thread started")
 
-        while True:
+        while self._comportContinue.isSet():
             try:
-                char = self._serial.read(1)
+                has_data  = self._serial.inWaiting()
+                if has_data > 0:
+                    char = self._serial.read(1)
+                else:
+                    time.sleep(0.1)
+                    continue                
+                
             except:
                 self._log.exception("serial exception - probably device disconnected")
+                self._comportContinue.clear()
                 events.event.register_exit()
                 
             char = int(char.encode("hex"), 16)
@@ -337,6 +359,7 @@ class Hardware:
             self._loop_idx += 1
             self._loop_reciver_timeout_lock.release()
         pass
+        self._log.debug("listening thread finished")
     
     ##
     # @brief called when valid serial frame is received from USB/wireless adaptor
@@ -439,8 +462,9 @@ class Hardware:
     # sends packet one by one if there is a free space the hardware queue
     # after certain timeout the whole buffer of hardware is discarded
     def __sending_loop2(self):
+        self._log.debug("Sending thread started")
         add = 0
-        while self._run:
+        while self._sendContinue.isSet():
             self._tx_finished_lock.acquire()
             if not self._send_queue.empty():
                 if len(self._buffer) < 3:
@@ -486,6 +510,8 @@ class Hardware:
                 
             self._tx_finished_lock.release()
             time.sleep(1)
+        
+        self._log.debug("sending thread finished")
                  
     ##
     # @brief old version of wireless packet sending thread code
@@ -493,7 +519,7 @@ class Hardware:
     def _sending_loop(self):
         tim = 0
         last_packet = None
-        while self._run:
+        while self._sendContinue.isSet():
             if self._packet_inside is False:
                 p = self._send_queue.get()
                 self._put_ack_payload(p)

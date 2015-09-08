@@ -19,7 +19,8 @@ import threading
 # and register method can be used in whole application
 class event:
     _queue = Queue.Queue()
-    _exit = True
+    _evt = threading.Event()
+    _evt.set()
 
     def __init__(self):
         pass
@@ -30,14 +31,12 @@ class event:
     @staticmethod
     def loop():
         #process callbacks from queue
-        j = event._exit
-        while j:
+        while event._evt.isSet():
             time.sleep(0.1)
             if not event._queue.empty():
                 cb = event._queue.get()
                 f = cb[0]
                 f(pickle.loads(cb[1]))
-            j = event._exit
         pass
     
     ##
@@ -54,11 +53,11 @@ class event:
     ##
     # @brief if this method is called event loop will end
     @staticmethod
-    def register_exit():
-        event._exit = False
-        n = threading.current_thread().name
-        logging.getLogger("root").exception("thread \"%s\" caused exception, application terminated",n)
-        pass
+    def register_exit(code = 1):
+        event._evt.clear()
+        if code == 1:
+            n = threading.current_thread().name
+            logging.getLogger("root").exception("thread \"%s\" caused exception, application terminated",n)        
     
 ##
 # @}
